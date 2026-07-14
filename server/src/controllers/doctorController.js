@@ -79,3 +79,47 @@ export const updateDoctorProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getDoctorAppointments = async (req, res, next) => {
+  try {
+    const doctor = await prisma.doctor.findUnique({
+      where: {
+        userId: req.user.id,
+      },
+    });
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: "NOT_FOUND",
+          message: "Doctor not found",
+        },
+      });
+    }
+
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        doctorId: doctor.id,
+      },
+      include: {
+        patient: {
+          include: {
+            user: true,
+          },
+        },
+      },
+      orderBy: {
+        date: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      data: appointments,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
