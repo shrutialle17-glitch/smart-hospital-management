@@ -15,9 +15,10 @@ import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import patientRoutes from './routes/patient.routes.js';
+import appointmentRoutes from './routes/appointment.routes.js';
+import doctorRoutes from './routes/doctor.routes.js';
 
 /*import userRoutes from './routes/user.routes.js';
-import appointmentRoutes from './routes/appointment.routes.js';
 import pharmacyRoutes from './routes/pharmacy.routes.js';
 import billingRoutes from './routes/billing.routes.js';
 import labRoutes from './routes/lab.routes.js';
@@ -76,9 +77,10 @@ app.use('/api/', limiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/patients', patientRoutes);
+app.use('/api/v1/appointments', appointmentRoutes);
+app.use('/api/v1/doctors', doctorRoutes);
 
 /*app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/appointments', appointmentRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
 app.use('/api/v1/billing', billingRoutes);
 app.use('/api/v1/lab', labRoutes);
