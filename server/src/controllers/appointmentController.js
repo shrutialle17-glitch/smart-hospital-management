@@ -50,3 +50,43 @@ export const bookAppointment = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateAppointmentStatus = async (req, res, next) => {
+  try {
+    const { appointmentId } = req.params;
+    const { status } = req.body;
+
+    const appointment = await prisma.appointment.findUnique({
+      where: {
+        id: appointmentId,
+      },
+    });
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: "NOT_FOUND",
+          message: "Appointment not found",
+        },
+      });
+    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        status,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Appointment status updated successfully",
+      data: updatedAppointment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
