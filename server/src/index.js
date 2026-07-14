@@ -17,6 +17,7 @@ import publicRoutes from './routes/public.routes.js';
 import patientRoutes from './routes/patient.routes.js';
 import appointmentRoutes from './routes/appointment.routes.js';
 import doctorRoutes from './routes/doctor.routes.js';
+import prescriptionRoutes from './routes/prescription.routes.js';
 
 /*import userRoutes from './routes/user.routes.js';
 import pharmacyRoutes from './routes/pharmacy.routes.js';
@@ -79,6 +80,7 @@ app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/patients', patientRoutes);
 app.use('/api/v1/appointments', appointmentRoutes);
 app.use('/api/v1/doctors', doctorRoutes);
+app.use('/api/v1/prescriptions', prescriptionRoutes);
 
 /*app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
