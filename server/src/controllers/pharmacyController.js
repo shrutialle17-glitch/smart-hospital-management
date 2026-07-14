@@ -13,10 +13,7 @@ export const getMedicines = async (req, res, next) => {
     
     // Low stock filter logic
     if (lowStock === 'true') {
-      where.stockLevel = { lte: prisma.medicine.fields.minStock }; // Assuming Prisma 5+ field references or we can just filter in JS, wait field references might be tricky in findMany.
-      // A safer approach for Prisma without field ref is pulling all and filtering, or raw SQL. But Prisma 5+ supports field references: { lte: prisma.medicine.fields.minStock } 
-      // Actually, field ref is `{ lte: prisma.medicine.fields.minStock }` - Wait, we can also just fetch all if it fails, but let's write it standard. 
-      // A simpler approach if field ref fails: 
+      where.stockLevel = { lte: prisma.medicine.fields.minStock }; 
     }
 
     const [medicines, total] = await Promise.all([
