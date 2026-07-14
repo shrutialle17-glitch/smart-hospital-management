@@ -30,3 +30,52 @@ export const getDoctorProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateDoctorProfile = async (req, res, next) => {
+  try {
+    const {
+      phone,
+      specialization,
+      qualifications,
+      experience,
+      consultationFee,
+      departmentId,
+    } = req.body;
+
+    // Update user phone
+    await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        phone,
+      },
+    });
+
+    // Update doctor profile
+    const doctor = await prisma.doctor.update({
+      where: {
+        userId: req.user.id,
+      },
+      data: {
+        specialization,
+        qualifications,
+        experience,
+        consultationFee,
+        departmentId,
+      },
+      include: {
+        user: true,
+        department: true,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor profile updated successfully",
+      data: doctor,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

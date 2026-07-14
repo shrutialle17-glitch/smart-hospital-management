@@ -1,10 +1,16 @@
 import express from "express";
-import { getDoctorProfile } from "../controllers/doctorController.js";
+import {
+  getDoctorProfile,
+  updateDoctorProfile,
+} from "../controllers/doctorController.js";
 import { isAuthenticated } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Get logged-in doctor profile
+// Get Doctor Profile
 router.get("/profile", isAuthenticated, getDoctorProfile);
+
+// Update Doctor Profile
+router.put("/profile", isAuthenticated, updateDoctorProfile);
 
 export default router;
