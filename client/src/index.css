@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 132, 169, 140;
+    --color-secondary: 15, 118, 110;
+    --color-accent: 91, 192, 190;
+    --color-background: 250, 247, 242;
+    --color-surface: 255, 255, 255;
+    --color-text-primary: 31, 41, 55;
+    --color-text-secondary: 75, 85, 99;
+    --color-text-muted: 156, 163, 175;
+    --color-border-light: 243, 244, 246;
+    --color-border-default: 229, 231, 235;
+    
+    --color-success: 34, 197, 94;
+    --color-warning: 245, 158, 11;
+    --color-error: 239, 68, 68;
+    --color-info: 59, 130, 246;
+    
+    --color-gray-50: 249, 250, 251;
+    --color-gray-100: 243, 244, 246;
+    --color-gray-200: 229, 231, 235;
+    --color-gray-300: 209, 213, 219;
+    --color-gray-400: 156, 163, 175;
+    --color-gray-500: 107, 114, 128;
+    --color-gray-600: 75, 85, 99;
+    --color-gray-700: 55, 65, 81;
+    --color-gray-800: 31, 41, 55;
+    --color-gray-900: 17, 24, 39;
+  }
+
+  .dark {
+    --color-primary: 114, 155, 122;    /* Muted primary */
+    --color-secondary: 45, 212, 191;  /* Brighter teal */
+    --color-accent: 56, 178, 172;
+    --color-background: 15, 23, 42; /* Slate 900 */
+    --color-surface: 30, 41, 59;    /* Slate 800 */
+    --color-text-primary: 248, 250, 252;
+    --color-text-secondary: 203, 213, 225;
+    --color-text-muted: 148, 163, 184;
+    --color-border-light: 51, 65, 85;
+    --color-border-default: 71, 85, 105;
+    
+    --color-success: 74, 222, 128;
+    --color-warning: 251, 191, 36;
+    --color-error: 248, 113, 113;
+    --color-info: 96, 165, 250;
+    
+    /* Inverted gray scale */
+    --color-gray-50: 17, 24, 39;
+    --color-gray-100: 31, 41, 55;
+    --color-gray-200: 55, 65, 81;
+    --color-gray-300: 75, 85, 99;
+    --color-gray-400: 107, 114, 128;
+    --color-gray-500: 156, 163, 175;
+    --color-gray-600: 209, 213, 219;
+    --color-gray-700: 229, 231, 235;
+    --color-gray-800: 243, 244, 246;
+    --color-gray-900: 249, 250, 251;
+  }
+
+  body {
+    @apply bg-background text-text-primary font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-surface/70 backdrop-blur-md border border-gray-200 shadow-sm rounded-2xl;
+  }
+}
