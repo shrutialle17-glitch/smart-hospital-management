@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const stats = [
   {
@@ -45,6 +46,8 @@ const appointments = [
 ];
 
 export default function DoctorDashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-8">
@@ -96,17 +99,35 @@ export default function DoctorDashboard() {
 
         {/* Quick Actions */}
         <div className="mt-8 flex gap-4 flex-wrap">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+
+          <button
+            onClick={() => navigate("/patient")}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+          >
             View Patients
           </button>
 
-          <button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">
+          <button
+            onClick={() => navigate("/doctor/prescription")}
+            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
+          >
             Add Prescription
           </button>
 
-          <button className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
+          <button
+            onClick={() => navigate("/doctor/diagnosis")}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg"
+          >
             Medical Records
           </button>
+
+          <button
+            onClick={() => navigate("/doctor/followup")}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg"
+          >
+            Follow-Up
+          </button>
+
         </div>
       </div>
     </div>

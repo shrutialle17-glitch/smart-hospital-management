@@ -8,10 +8,10 @@ import {
 import { useAuthStore } from "../store/authStore";
 import { Suspense, lazy } from "react";
 
-// Shell Layout
+// Layout
 import MainLayout from "../layouts/MainLayout";
 
-// Auth & Public Pages
+// Public Pages
 const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 const Home = lazy(() => import("../pages/Home"));
@@ -20,14 +20,18 @@ const DoctorsPage = lazy(() => import("../pages/DoctorsPage"));
 // Dashboards
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const DoctorDashboard = lazy(() => import("../pages/doctor/DoctorDashboard"));
-const PatientDashboard = lazy(() => import("../pages/patient/PatientDashboard"));
+const PatientDashboard = lazy(() =>
+  import("../pages/patient/PatientDashboard")
+);
 const ReceptionistDashboard = lazy(() =>
   import("../pages/receptionist/ReceptionistDashboard")
 );
 const PharmacistDashboard = lazy(() =>
   import("../pages/pharmacist/PharmacistDashboard")
 );
-const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
+const LabDashboard = lazy(() =>
+  import("../pages/lab/LabDashboard")
+);
 
 // Patient Pages
 const PatientRegistration = lazy(() =>
@@ -44,6 +48,19 @@ const AppointmentBooking = lazy(() =>
 
 const MedicalHistory = lazy(() =>
   import("../pages/patient/MedicalHistory")
+);
+
+// Doctor Pages
+const Diagnosis = lazy(() =>
+  import("../pages/doctor/Diagnosis")
+);
+
+const Prescription = lazy(() =>
+  import("../pages/doctor/Prescription")
+);
+
+const FollowUp = lazy(() =>
+  import("../pages/doctor/FollowUp")
 );
 
 const HomeRoute = () => {
@@ -86,13 +103,17 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Test Routes */}
+          {/* Testing Routes */}
           <Route path="/test-register" element={<PatientRegistration />} />
           <Route path="/test-profile" element={<PatientProfile />} />
           <Route path="/test-appointment" element={<AppointmentBooking />} />
           <Route path="/test-history" element={<MedicalHistory />} />
+          <Route path="/test-diagnosis" element={<Diagnosis />} />
+          <Route path="/test-prescription" element={<Prescription />} />
+          <Route path="/test-followup" element={<FollowUp />} />
 
           <Route element={<MainLayout />}>
+
             {/* Dashboard */}
             <Route element={<ProtectedRoute />}>
               <Route path="dashboard" element={<RoleBasedDashboard />} />
@@ -106,34 +127,53 @@ const AppRoutes = () => {
             {/* Doctor */}
             <Route element={<ProtectedRoute allowedRoles={["DOCTOR"]} />}>
               <Route path="doctor" element={<DoctorDashboard />} />
+              <Route path="doctor/diagnosis" element={<Diagnosis />} />
+              <Route path="doctor/prescription" element={<Prescription />} />
+              <Route path="doctor/followup" element={<FollowUp />} />
             </Route>
 
             {/* Patient */}
             <Route element={<ProtectedRoute allowedRoles={["PATIENT"]} />}>
               <Route path="patient" element={<PatientDashboard />} />
-              <Route path="patient/register" element={<PatientRegistration />} />
-              <Route path="patient/profile" element={<PatientProfile />} />
+              <Route
+                path="patient/register"
+                element={<PatientRegistration />}
+              />
+              <Route
+                path="patient/profile"
+                element={<PatientProfile />}
+              />
               <Route
                 path="patient/appointment"
                 element={<AppointmentBooking />}
               />
-              <Route path="patient/history" element={<MedicalHistory />} />
+              <Route
+                path="patient/history"
+                element={<MedicalHistory />}
+              />
             </Route>
 
             {/* Receptionist */}
             <Route element={<ProtectedRoute allowedRoles={["RECEPTIONIST"]} />}>
-              <Route path="reception" element={<ReceptionistDashboard />} />
+              <Route
+                path="reception"
+                element={<ReceptionistDashboard />}
+              />
             </Route>
 
             {/* Pharmacist */}
             <Route element={<ProtectedRoute allowedRoles={["PHARMACIST"]} />}>
-              <Route path="pharmacy" element={<PharmacistDashboard />} />
+              <Route
+                path="pharmacy"
+                element={<PharmacistDashboard />}
+              />
             </Route>
 
             {/* Lab */}
             <Route element={<ProtectedRoute allowedRoles={["LAB_STAFF"]} />}>
               <Route path="lab" element={<LabDashboard />} />
             </Route>
+
           </Route>
 
           <Route
@@ -152,7 +192,9 @@ const AppRoutes = () => {
             path="*"
             element={
               <div className="p-8 text-center">
-                <h1 className="text-2xl font-bold">404 - Not Found</h1>
+                <h1 className="text-2xl font-bold">
+                  404 - Not Found
+                </h1>
               </div>
             }
           />
