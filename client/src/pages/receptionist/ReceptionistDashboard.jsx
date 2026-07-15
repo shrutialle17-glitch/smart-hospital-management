@@ -48,6 +48,20 @@ const ReceptionistDashboard = () => {
     enabled: isBookModalOpen
   });
 
+  const { data: pendingBills, isLoading: billsLoading } = useQuery({
+    queryKey: ['pendingBills'],
+    queryFn: async () => {
+      const { data } = await api.get('/billing', {
+        params: {
+          status: 'UNPAID',
+          limit: 500
+        }
+      });
+
+      return data.data;
+    }
+  });
+
   const registerMutation = useMutation({
     mutationFn: (data) => api.post('/patients', data),
     onSuccess: () => {
@@ -94,6 +108,24 @@ const ReceptionistDashboard = () => {
     mutationFn: ({ id, status }) => api.patch(`/appointments/${id}/status`, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries(['receptionAppointments']);
+    }
+  });
+
+  const payBillMutation = useMutation({
+    mutationFn: (bill) =>
+      api.post(`/billing/${bill.id}/payments`, {
+        amount: bill.totalAmount - bill.paidAmount,
+        paymentMethod: "CASH",
+        transactionId: null
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pendingBills'] });
+      toast.success("Bill paid successfully!");
+    },
+
+    onError: (err) => {
+      toast.error(err.response?.data?.error?.message || "Payment failed");
     }
   });
 
@@ -216,9 +248,40 @@ const ReceptionistDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-gray-400 py-6 text-sm">
-                All caught up!
-              </div>
+              {billsLoading ? (
+                <p>Loading...</p>
+              ) : pendingBills?.length > 0 ? (
+                <div className="space-y-3">
+                  {pendingBills.map((bill) => (
+                    <div
+                      key={bill.id}
+                      className="border rounded-lg p-3 flex justify-between items-center"
+                    >
+                      <div>
+                        <p className="font-semibold">
+                          {bill.patient?.user?.firstName} {bill.patient?.user?.lastName}
+                        </p>
+
+                        <p className="text-sm text-gray-500">
+                          ₹{bill.balanceAmount}
+                        </p>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        disabled={payBillMutation.isPending}
+                        onClick={() => payBillMutation.mutate(bill)}
+                      >
+                        Pay Now
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-400 py-6">
+                  All caught up!
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
