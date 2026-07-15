@@ -112,7 +112,7 @@ const AppRoutes = () => {
               <Route path="patients" element={
                 <GenericListPage
                   title="Patient Directory"
-                  endpoint="/users?role=PATIENT&limit=50"
+                  endpoint="/users?role=PATIENT&limit=100"
                   columns={[
                     { key: 'firstName', label: 'First Name' },
                     { key: 'lastName', label: 'Last Name' },
@@ -139,7 +139,7 @@ const AppRoutes = () => {
               <Route path="lab/reports" element={
                 <GenericListPage
                   title="Lab Reports"
-                  endpoint="/lab/reports"
+                  endpoint="/lab/reports?limit=50"
                   columns={[
                     { key: 'test.name', label: 'Test Name' },
                     { key: 'patient.user.firstName', label: 'Patient', render: (i) => `${i.patient.user.firstName} ${i.patient.user.lastName}` },
@@ -153,7 +153,7 @@ const AppRoutes = () => {
               <Route path="pharmacy/inventory" element={
                 <GenericListPage
                   title="Pharmacy Inventory"
-                  endpoint="/pharmacy/medicines"
+                  endpoint="/pharmacy/medicines?limit=50"
                   columns={[
                     { key: 'name', label: 'Medicine Name' },
                     { key: 'category.name', label: 'Category' },
@@ -165,7 +165,7 @@ const AppRoutes = () => {
               <Route path="pharmacy/history" element={
                 <GenericListPage
                   title="Prescription History"
-                  endpoint="/pharmacy/prescriptions"
+                  endpoint="/pharmacy/prescriptions?limit=50"
                   columns={[
                     { key: 'patient.user.firstName', label: 'Patient', render: (i) => `${i.patient.user.firstName} ${i.patient.user.lastName}` },
                     { key: 'doctor.user.lastName', label: 'Doctor', render: (i) => `Dr. ${i.doctor.user.lastName}` },
