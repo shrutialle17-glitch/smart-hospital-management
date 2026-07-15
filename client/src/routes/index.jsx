@@ -149,6 +149,32 @@ const AppRoutes = () => {
                 />
               } />
             </Route>
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'PHARMACIST']} />}>
+              <Route path="pharmacy/inventory" element={
+                <GenericListPage
+                  title="Pharmacy Inventory"
+                  endpoint="/pharmacy/medicines"
+                  columns={[
+                    { key: 'name', label: 'Medicine Name' },
+                    { key: 'category.name', label: 'Category' },
+                    { key: 'unitPrice', label: 'Price (₹)', render: (i, v) => `₹${Number(v || 0).toFixed(2)}` },
+                    { key: 'stockLevel', label: 'Stock Level', render: (i, v) => <span className={`font-bold ${v < 20 ? 'text-red-500' : 'text-green-500'}`}>{v}</span> }
+                  ]}
+                />
+              } />
+              <Route path="pharmacy/history" element={
+                <GenericListPage
+                  title="Prescription History"
+                  endpoint="/pharmacy/prescriptions"
+                  columns={[
+                    { key: 'patient.user.firstName', label: 'Patient', render: (i) => `${i.patient.user.firstName} ${i.patient.user.lastName}` },
+                    { key: 'doctor.user.lastName', label: 'Doctor', render: (i) => `Dr. ${i.doctor.user.lastName}` },
+                    { key: 'status', label: 'Status', render: (i, v) => <span className={`px-2 py-1 text-xs font-bold rounded-full ${v === 'FULFILLED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{v}</span> },
+                    { key: 'createdAt', label: 'Date', render: (i, v) => new Date(v).toLocaleDateString() }
+                  ]}
+                />
+              } />
+            </Route>
           </Route>
 
           <Route
