@@ -2,15 +2,12 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { 
   LogOut, User as UserIcon, LayoutDashboard, Users, 
-  Calendar, Pill, TestTube, FileText, Settings, Bell, Building, Check, Trash2, Sun, Moon,
-  Menu, X
+  Calendar, Pill, TestTube, FileText, Settings, Bell, Building, Check, Trash2, Sun, Moon
 } from 'lucide-react';
 import api from '../services/api';
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import AIFloatingButton from '../components/AIAssistant/AIFloatingButton';
-import AIDrawer from '../components/AIAssistant/AIDrawer';
 
 const fetchNotifications = async () => {
   const { data } = await api.get('/notifications');
@@ -22,12 +19,6 @@ const MainLayout = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Auto-close sidebar on route change (mobile)
-  useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [location.pathname]);
 
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -120,33 +111,11 @@ const MainLayout = () => {
 
   return (
     <div className="flex h-screen bg-background text-text-primary overflow-hidden font-sans">
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
       {/* Sidebar */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-surface border-r border-gray-100 dark:border-gray-800 flex flex-col shrink-0
-        transform transition-transform duration-300 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0 md:z-20
-      `}>
-        <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="MediCore Logo" className="w-8 h-8 object-contain" />
-            <Link to="/" className="font-heading font-bold text-xl text-secondary dark:text-white tracking-tight">MediCore</Link>
-          </div>
-          {/* Close button - mobile only */}
-          <button 
-            className="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <X size={20} />
-          </button>
+      <aside className="w-64 bg-surface border-r border-gray-100 dark:border-gray-800 flex flex-col z-20 shrink-0">
+        <div className="p-6 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800">
+          <img src="/logo.png" alt="MediCore Logo" className="w-8 h-8 object-contain" />
+          <Link to="/" className="font-heading font-bold text-xl text-secondary dark:text-white tracking-tight">MediCore</Link>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-1">
@@ -157,7 +126,6 @@ const MainLayout = () => {
               <Link 
                 key={link.name} 
                 to={link.path}
-                onClick={() => setIsSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 font-medium text-sm ${
                   isActive 
                   ? 'bg-primary/10 text-primary dark:bg-primary/20 font-semibold' 
@@ -194,16 +162,8 @@ const MainLayout = () => {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Top Header */}
-        <header className="h-16 bg-surface border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 md:px-8 shrink-0 z-10 sticky top-0">
-          <div className="flex items-center gap-3">
-            {/* Hamburger Menu - mobile only */}
-            <button 
-              className="md:hidden p-2 rounded-lg text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
-              onClick={() => setIsSidebarOpen(true)}
-              aria-label="Open sidebar menu"
-            >
-              <Menu size={22} />
-            </button>
+        <header className="h-16 bg-surface/85 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-8 shrink-0 z-10 sticky top-0">
+          <div className="flex items-center gap-4">
             <h2 className="font-heading font-bold text-lg text-secondary dark:text-white capitalize">
               {location.pathname.split('/')[1] || 'Dashboard'}
             </h2>
@@ -293,7 +253,7 @@ const MainLayout = () => {
         </header>
 
         {/* Dynamic Page Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50/50 dark:bg-background">
+        <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50 dark:bg-background">
           <div className="max-w-7xl mx-auto">
             <motion.div
               key={location.pathname}
@@ -306,10 +266,6 @@ const MainLayout = () => {
           </div>
         </div>
       </main>
-
-      {/* Global AI Assistant Components */}
-      <AIFloatingButton />
-      <AIDrawer />
     </div>
   );
 };
