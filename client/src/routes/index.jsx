@@ -16,30 +16,45 @@ const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 const Home = lazy(() => import("../pages/Home"));
 const DoctorsPage = lazy(() => import("../pages/DoctorsPage"));
-const HomeRoute = () => {
-  const { isAuthenticated } = useAuthStore();
 
-  return isAuthenticated
-    ? <Navigate to="/dashboard" replace />
-    : <Home />;
-};
-
-//Dashboards
+// Dashboards
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const DoctorDashboard = lazy(() => import("../pages/doctor/DoctorDashboard"));
-const PatientDashboard = lazy(
-  () => import("../pages/patient/PatientDashboard"),
+const PatientDashboard = lazy(() => import("../pages/patient/PatientDashboard"));
+const ReceptionistDashboard = lazy(() =>
+  import("../pages/receptionist/ReceptionistDashboard")
 );
-const ReceptionistDashboard = lazy(
-  () => import("../pages/receptionist/ReceptionistDashboard"),
-);
-const PharmacistDashboard = lazy(
-  () => import("../pages/pharmacist/PharmacistDashboard"),
+const PharmacistDashboard = lazy(() =>
+  import("../pages/pharmacist/PharmacistDashboard")
 );
 const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
 
-// Generic List Views for Sidebar
-//const GenericListPage = lazy(() => import('../pages/GenericListPage'));
+// Patient Pages
+const PatientRegistration = lazy(() =>
+  import("../pages/patient/PatientRegistration")
+);
+
+const PatientProfile = lazy(() =>
+  import("../pages/patient/PatientProfile")
+);
+
+const AppointmentBooking = lazy(() =>
+  import("../pages/patient/AppointmentBooking")
+);
+
+const MedicalHistory = lazy(() =>
+  import("../pages/patient/MedicalHistory")
+);
+
+const HomeRoute = () => {
+  const { isAuthenticated } = useAuthStore();
+
+  return isAuthenticated ? (
+    <Navigate to="/dashboard" replace />
+  ) : (
+    <Home />
+  );
+};
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { isAuthenticated, user } = useAuthStore();
@@ -71,54 +86,68 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          {/* Test Routes */}
+          <Route path="/test-register" element={<PatientRegistration />} />
+          <Route path="/test-profile" element={<PatientProfile />} />
+          <Route path="/test-appointment" element={<AppointmentBooking />} />
+          <Route path="/test-history" element={<MedicalHistory />} />
+
           <Route element={<MainLayout />}>
-            {/* Dynamic Dashboard Route based on Role */}
+            {/* Dashboard */}
             <Route element={<ProtectedRoute />}>
               <Route path="dashboard" element={<RoleBasedDashboard />} />
             </Route>
 
-            {/* Admin Routes */}
+            {/* Admin */}
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
               <Route path="admin" element={<AdminDashboard />} />
             </Route>
 
-            {/* Doctor Routes */}
+            {/* Doctor */}
             <Route element={<ProtectedRoute allowedRoles={["DOCTOR"]} />}>
               <Route path="doctor" element={<DoctorDashboard />} />
             </Route>
 
-            {/* Patient Routes */}
+            {/* Patient */}
             <Route element={<ProtectedRoute allowedRoles={["PATIENT"]} />}>
               <Route path="patient" element={<PatientDashboard />} />
+              <Route path="patient/register" element={<PatientRegistration />} />
+              <Route path="patient/profile" element={<PatientProfile />} />
+              <Route
+                path="patient/appointment"
+                element={<AppointmentBooking />}
+              />
+              <Route path="patient/history" element={<MedicalHistory />} />
             </Route>
 
-            {/* Receptionist Routes */}
+            {/* Receptionist */}
             <Route element={<ProtectedRoute allowedRoles={["RECEPTIONIST"]} />}>
               <Route path="reception" element={<ReceptionistDashboard />} />
             </Route>
 
-            {/* Pharmacist Routes */}
+            {/* Pharmacist */}
             <Route element={<ProtectedRoute allowedRoles={["PHARMACIST"]} />}>
               <Route path="pharmacy" element={<PharmacistDashboard />} />
             </Route>
 
-            {/* Lab Staff Routes */}
+            {/* Lab */}
             <Route element={<ProtectedRoute allowedRoles={["LAB_STAFF"]} />}>
               <Route path="lab" element={<LabDashboard />} />
             </Route>
-
-            {/* Common Lists */}
           </Route>
 
           <Route
             path="/unauthorized"
             element={
               <div className="p-8 text-center">
-                <h1 className="text-2xl font-bold text-error">Unauthorized</h1>
+                <h1 className="text-2xl font-bold text-error">
+                  Unauthorized
+                </h1>
                 <p>You do not have permission to view this page.</p>
               </div>
             }
           />
+
           <Route
             path="*"
             element={
