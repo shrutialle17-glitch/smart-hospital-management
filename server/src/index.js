@@ -18,8 +18,7 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import labRoutes from './routes/lab.routes.js';
 import pharmacyRoutes from './routes/pharmacy.routes.js';
 import billingRoutes from './routes/billing.routes.js';
-
-// We will import more routes here as we build them
+import notificationRoutes from './routes/notification.routes.js';
 
 dotenv.config();
 
@@ -60,6 +59,7 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/lab', labRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
 app.use('/api/v1/billing', billingRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
