@@ -123,3 +123,75 @@ export const getDoctorAppointments = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getDoctorDashboard = async (req, res, next) => {
+  try {
+    const doctor = await prisma.doctor.findUnique({
+      where: {
+        userId: req.user.id,
+      },
+    });
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+
+    const totalPatients = await prisma.appointment.findMany({
+      where: {
+        doctorId: doctor.id,
+      },
+      distinct: ["patientId"],
+    });
+
+    const totalAppointments = await prisma.appointment.count({
+      where: {
+        doctorId: doctor.id,
+      },
+    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const todayAppointments = await prisma.appointment.count({
+      where: {
+        doctorId: doctor.id,
+        date: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+    });
+
+    const pendingAppointments = await prisma.appointment.count({
+      where: {
+        doctorId: doctor.id,
+        status: "PENDING",
+      },
+    });
+
+    const totalPrescriptions = await prisma.prescription.count({
+      where: {
+        doctorId: doctor.id,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalPatients: totalPatients.length,
+        totalAppointments,
+        todayAppointments,
+        pendingAppointments,
+        totalPrescriptions,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

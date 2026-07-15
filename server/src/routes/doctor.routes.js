@@ -3,10 +3,13 @@ import {
   getDoctorProfile,
   updateDoctorProfile,
   getDoctorAppointments,
+  getDoctorDashboard,
 } from "../controllers/doctorController.js";
 import { isAuthenticated } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+router.get("/dashboard", isAuthenticated, getDoctorDashboard);
 
 router.get("/profile", isAuthenticated, getDoctorProfile);
 
