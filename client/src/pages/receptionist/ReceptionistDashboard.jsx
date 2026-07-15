@@ -68,8 +68,8 @@ const ReceptionistDashboard = () => {
   const bookAppointmentMutation = useMutation({
     mutationFn: (apptData) => {
       const start = new Date(`${apptData.date}T${apptData.time}`);
-      const end = new Date(start.getTime() + 30 * 60000); 
-      
+      const end = new Date(start.getTime() + 30 * 60000);
+
       return api.post('/appointments', {
         patientId: apptData.patientId,
         doctorId: apptData.doctorId,
@@ -109,7 +109,7 @@ const ReceptionistDashboard = () => {
           <h1 className="text-3xl font-heading font-bold text-secondary mb-2">Front Desk</h1>
           <p className="text-gray-500">Manage patients and daily schedules.</p>
         </div>
-        
+
         <div className="flex gap-3">
           <Button variant="outline" className="bg-surface border-gray-200 dark:border-gray-800" onClick={() => setIsRegisterOpen(true)}>
             <Users size={18} className="mr-2 text-primary" />
@@ -184,9 +184,9 @@ const ReceptionistDashboard = () => {
                         </td>
                         <td className="px-4 py-3 text-right flex justify-end gap-2">
                           <Button variant="outline" size="sm" onClick={() => handlePrintID(apt.patient)}>Print ID</Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className={`text-primary ${apt.status !== 'PENDING' ? 'opacity-50 pointer-events-none' : ''}`}
                             disabled={apt.status !== 'PENDING' || updateStatusMutation.isPending}
                             onClick={() => updateStatusMutation.mutate({ id: apt.id, status: 'CONFIRMED' })}
@@ -209,17 +209,17 @@ const ReceptionistDashboard = () => {
 
         <div className="space-y-6">
           <Card>
-             <CardHeader>
-               <CardTitle className="text-lg flex items-center gap-2">
-                 <Clock size={18} className="text-warning" />
-                 Pending Bills
-               </CardTitle>
-             </CardHeader>
-             <CardContent>
-               <div className="text-center text-gray-400 py-6 text-sm">
-                 All caught up!
-               </div>
-             </CardContent>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Clock size={18} className="text-warning" />
+                Pending Bills
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center text-gray-400 py-6 text-sm">
+                All caught up!
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
@@ -239,36 +239,36 @@ const ReceptionistDashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">First Name</label>
-                    <input required type="text" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.firstName} onChange={e => setNewPatient({...newPatient, firstName: e.target.value})} />
+                    <input required type="text" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.firstName} onChange={e => setNewPatient({ ...newPatient, firstName: e.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Last Name</label>
-                    <input required type="text" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.lastName} onChange={e => setNewPatient({...newPatient, lastName: e.target.value})} />
+                    <input required type="text" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.lastName} onChange={e => setNewPatient({ ...newPatient, lastName: e.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Email (for Portal Access)</label>
-                    <input required type="email" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.email} onChange={e => setNewPatient({...newPatient, email: e.target.value})} />
+                    <input required type="email" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.email} onChange={e => setNewPatient({ ...newPatient, email: e.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Temporary Password</label>
-                    <input required type="password" minLength="6" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.password} onChange={e => setNewPatient({...newPatient, password: e.target.value})} />
+                    <input required type="password" minLength="6" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.password} onChange={e => setNewPatient({ ...newPatient, password: e.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Phone</label>
-                    <input required type="tel" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.phone} onChange={e => setNewPatient({...newPatient, phone: e.target.value})} />
+                    <input required type="tel" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.phone} onChange={e => setNewPatient({ ...newPatient, phone: e.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Emergency Contact</label>
-                    <input required type="tel" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.emergencyContact} onChange={e => setNewPatient({...newPatient, emergencyContact: e.target.value})} />
+                    <input required type="tel" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.emergencyContact} onChange={e => setNewPatient({ ...newPatient, emergencyContact: e.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Date of Birth</label>
-                    <input required type="date" max={new Date().toISOString().split('T')[0]} className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.dob} onChange={e => setNewPatient({...newPatient, dob: e.target.value})} />
+                    <input required type="date" max={new Date().toISOString().split('T')[0]} className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newPatient.dob} onChange={e => setNewPatient({ ...newPatient, dob: e.target.value })} />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-gray-600 uppercase">Gender</label>
-                      <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newPatient.gender} onChange={e => setNewPatient({...newPatient, gender: e.target.value})}>
+                      <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newPatient.gender} onChange={e => setNewPatient({ ...newPatient, gender: e.target.value })}>
                         <option value="">Select</option>
                         <option value="MALE">Male</option>
                         <option value="FEMALE">Female</option>
@@ -277,16 +277,16 @@ const ReceptionistDashboard = () => {
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-gray-600 uppercase">Blood Group</label>
-                      <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newPatient.bloodGroup} onChange={e => setNewPatient({...newPatient, bloodGroup: e.target.value})}>
-                         <option value="">Select</option>
-                         <option value="O_POS">O+</option>
-                         <option value="O_NEG">O-</option>
-                         <option value="A_POS">A+</option>
-                         <option value="A_NEG">A-</option>
-                         <option value="B_POS">B+</option>
-                         <option value="B_NEG">B-</option>
-                         <option value="AB_POS">AB+</option>
-                         <option value="AB_NEG">AB-</option>
+                      <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newPatient.bloodGroup} onChange={e => setNewPatient({ ...newPatient, bloodGroup: e.target.value })}>
+                        <option value="">Select</option>
+                        <option value="O_POS">O+</option>
+                        <option value="O_NEG">O-</option>
+                        <option value="A_POS">A+</option>
+                        <option value="A_NEG">A-</option>
+                        <option value="B_POS">B+</option>
+                        <option value="B_NEG">B-</option>
+                        <option value="AB_POS">AB+</option>
+                        <option value="AB_NEG">AB-</option>
                       </select>
                     </div>
                   </div>
@@ -318,42 +318,42 @@ const ReceptionistDashboard = () => {
               <form onSubmit={e => { e.preventDefault(); bookAppointmentMutation.mutate(newAppointment); }} className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-gray-600 uppercase">Select Patient</label>
-                  <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newAppointment.patientId} onChange={e => setNewAppointment({...newAppointment, patientId: e.target.value})}>
+                  <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newAppointment.patientId} onChange={e => setNewAppointment({ ...newAppointment, patientId: e.target.value })}>
                     <option value="">-- Choose a Patient --</option>
                     {patients?.map(p => (
-                       <option key={p.id} value={p.patientProfile?.id || p.id}>
-                          {p.firstName} {p.lastName} ({p.email})
-                       </option>
+                      <option key={p.id} value={p.patientProfile?.id || p.id}>
+                        {p.firstName} {p.lastName} ({p.email})
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-gray-600 uppercase">Select Doctor</label>
-                  <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newAppointment.doctorId} onChange={e => setNewAppointment({...newAppointment, doctorId: e.target.value})}>
+                  <select required className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg text-sm bg-surface" value={newAppointment.doctorId} onChange={e => setNewAppointment({ ...newAppointment, doctorId: e.target.value })}>
                     <option value="">-- Choose a Doctor --</option>
                     {doctors?.map(doc => (
-                       <option key={doc.id} value={doc.doctorProfile?.id || doc.id}>
-                          Dr. {doc.firstName} {doc.lastName}
-                       </option>
+                      <option key={doc.id} value={doc.doctorProfile?.id || doc.id}>
+                        Dr. {doc.firstName} {doc.lastName}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Date</label>
-                    <input required type="date" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newAppointment.date} onChange={e => setNewAppointment({...newAppointment, date: e.target.value})} min={new Date().toISOString().split('T')[0]} />
+                    <input required type="date" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newAppointment.date} onChange={e => setNewAppointment({ ...newAppointment, date: e.target.value })} min={new Date().toISOString().split('T')[0]} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-600 uppercase">Time</label>
-                    <input required type="time" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newAppointment.time} onChange={e => setNewAppointment({...newAppointment, time: e.target.value})} />
+                    <input required type="time" className="w-full p-2 border border-gray-200 rounded-lg text-sm" value={newAppointment.time} onChange={e => setNewAppointment({ ...newAppointment, time: e.target.value })} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-gray-600 uppercase">Reason for Visit</label>
-                  <textarea required className="w-full p-2 border border-gray-200 rounded-lg text-sm h-20" placeholder="Briefly describe the symptoms..." value={newAppointment.reason} onChange={e => setNewAppointment({...newAppointment, reason: e.target.value})}></textarea>
+                  <textarea required className="w-full p-2 border border-gray-200 rounded-lg text-sm h-20" placeholder="Briefly describe the symptoms..." value={newAppointment.reason} onChange={e => setNewAppointment({ ...newAppointment, reason: e.target.value })}></textarea>
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3">
