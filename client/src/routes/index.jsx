@@ -39,7 +39,7 @@ const PharmacistDashboard = lazy(
 const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
 
 // Generic List Views for Sidebar
-//const GenericListPage = lazy(() => import('../pages/GenericListPage'));
+const GenericListPage = lazy(() => import('../pages/GenericListPage'));
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { isAuthenticated, user } = useAuthStore();
@@ -108,6 +108,47 @@ const AppRoutes = () => {
             </Route>
 
             {/* Common Lists */}
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']} />}>
+              <Route path="patients" element={
+                <GenericListPage
+                  title="Patient Directory"
+                  endpoint="/users?role=PATIENT&limit=50"
+                  columns={[
+                    { key: 'firstName', label: 'First Name' },
+                    { key: 'lastName', label: 'Last Name' },
+                    { key: 'email', label: 'Email' },
+                    { key: 'phone', label: 'Phone' },
+                    { key: 'createdAt', label: 'Registered On', render: (i, v) => new Date(v).toLocaleDateString() }
+                  ]}
+                />
+              } />
+              <Route path="appointments" element={
+                <GenericListPage
+                  title="All Appointments"
+                  endpoint="/appointments?limit=50"
+                  columns={[
+                    { key: 'patient.user.firstName', label: 'Patient', render: (i) => `${i.patient.user.firstName} ${i.patient.user.lastName}` },
+                    { key: 'doctor.user.lastName', label: 'Doctor', render: (i) => `Dr. ${i.doctor.user.lastName}` },
+                    { key: 'startTime', label: 'Date', render: (i, v) => new Date(v).toLocaleDateString() },
+                    { key: 'status', label: 'Status', render: (i, v) => <span className={`px-2 py-1 text-xs font-bold rounded-full ${v === 'CONFIRMED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{v}</span> }
+                  ]}
+                />
+              } />
+            </Route>
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'LAB_STAFF']} />}>
+              <Route path="lab/reports" element={
+                <GenericListPage
+                  title="Lab Reports"
+                  endpoint="/lab/reports"
+                  columns={[
+                    { key: 'test.name', label: 'Test Name' },
+                    { key: 'patient.user.firstName', label: 'Patient', render: (i) => `${i.patient.user.firstName} ${i.patient.user.lastName}` },
+                    { key: 'status', label: 'Status' },
+                    { key: 'createdAt', label: 'Requested On', render: (i, v) => new Date(v).toLocaleDateString() }
+                  ]}
+                />
+              } />
+            </Route>
           </Route>
 
           <Route
