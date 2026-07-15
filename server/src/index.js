@@ -19,6 +19,8 @@ import doctorRoutes from './routes/doctor.routes.js';
 import appointmentRoutes from './routes/appointment.routes.js';
 import prescriptionRoutes from './routes/prescription.routes.js';
 import medicalRecordRoutes from './routes/medicalRecord.routes.js';
+import diagnosisRoutes from './routes/diagnosis.routes.js';
+import followUpRoutes from './routes/followUp.routes.js';
 
 /*import userRoutes from './routes/user.routes.js';
 import pharmacyRoutes from './routes/pharmacy.routes.js';
@@ -83,6 +85,8 @@ app.use('/api/v1/doctors', doctorRoutes);
 app.use('/api/v1/appointments', appointmentRoutes);
 app.use('/api/v1/prescriptions', prescriptionRoutes);
 app.use('/api/v1/medical-records', medicalRecordRoutes);
+app.use('/api/v1/diagnosis', diagnosisRoutes);
+app.use('/api/v1/follow-ups', followUpRoutes);
 
 /*app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
