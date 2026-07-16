@@ -23,7 +23,7 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import departmentRoutes from './routes/department.routes.js';
-
+import bedRoutes from './routes/bed.routes.js';   
 // We will import more routes here as we build them
 
 dotenv.config();
@@ -71,7 +71,7 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/departments', departmentRoutes);
-
+app.use('/api/v1/beds', bedRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
