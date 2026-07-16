@@ -75,16 +75,13 @@ const Home = () => {
 
       {/* --- HERO SECTION --- */}
       <section className="relative w-full h-[90vh] flex items-center justify-center overflow-hidden pt-20">
-        {/* Background Image with Dark Overlay for excellent contrast */}
+        {/* Background Image with optimized gradient for visibility & contrast */}
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/hero-bg.png)' }}
         >
-          {/* Subtle gradient overlay to ensure text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/70 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/40 to-transparent dark:from-black/95 dark:via-black/60 dark:to-black/20"></div>
         </div>
-
-
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <motion.div 
@@ -93,18 +90,18 @@ const Home = () => {
             variants={staggerContainer}
             className="max-w-2xl"
           >
-            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-medium text-white mb-6 backdrop-blur-md">
+            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/40 backdrop-blur-md border border-white/10 text-sm font-semibold text-white mb-6 shadow-xl">
               <Shield size={16} className="text-primary" />
               Excellence in Modern Medicine
             </motion.div>
             
-            <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-heading font-extrabold text-white leading-tight mb-6">
+            <motion.h1 variants={fadeInUp} className="text-5xl md:text-[5rem] font-sans font-black text-white leading-[1.1] tracking-tight mb-6">
               World-Class <br />
-              <span className="text-[#84A98C]">Healthcare,</span><br />
-              Human Touch.
+              <span className="text-primary">Healthcare,</span><br />
+              <span className="text-white/90">Human Touch.</span>
             </motion.h1>
             
-            <motion.p variants={fadeInUp} className="text-lg text-gray-200 mb-8 max-w-lg leading-relaxed">
+            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-white/80 mb-8 max-w-lg leading-relaxed font-medium">
               Experience the pinnacle of medical care with MediCore’s state-of-the-art facilities and compassionate experts. Your health is our highest priority.
             </motion.p>
             

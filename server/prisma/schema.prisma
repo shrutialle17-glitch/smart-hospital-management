@@ -1,14 +1,12 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
 }
 
 enum Role {
@@ -61,6 +59,7 @@ model User {
   
   notifications Notification[]
   auditLogs     AuditLog[]
+  aiInteractions AIInteraction[]
 }
 
 model Admin {
@@ -82,6 +81,9 @@ model Doctor {
 
   appointments  Appointment[]
   prescriptions Prescription[]
+  voiceNotes    VoiceNote[]
+  prescriptionTemplates PrescriptionTemplate[]
+  queueTokens   QueueToken[]
 }
 
 model Receptionist {
@@ -107,6 +109,11 @@ model Patient {
   prescriptions  Prescription[]
   labReports     LabReport[]
   bills          Bill[]
+  currentBed     Bed[]             @relation("CurrentBed")
+  bedAssignments BedAssignment[]   @relation("BedAssignments")
+  ambulanceRequests AmbulanceRequest[] @relation("AmbulanceRequests")
+  bloodRequests  BloodRequest[]    @relation("BloodRequests")
+  queueTokens    QueueToken[]      @relation("QueueTokens")
 }
 
 model LabStaff {
@@ -145,6 +152,7 @@ model Appointment {
   notes     String?
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+  queueToken QueueToken?      @relation("AppointmentToken")
 
   @@index([patientId])
   @@index([doctorId])
@@ -314,14 +322,18 @@ model Payment {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  message   String
-  type      String   // APPOINTMENT, LAB, PRESCRIPTION, BILLING, SYSTEM
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id                String    @id @default(uuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title             String
+  message           String
+  type              String    // APPOINTMENT, LAB, PRESCRIPTION, BILLING, SYSTEM, VOICE_NOTE, CERTIFICATE
+  isRead            Boolean   @default(false)
+  readAt            DateTime?
+  relatedEntityType String?
+  relatedEntityId   String?
+  channelsSent      String[]  // Array of channels, e.g., ["IN_APP", "EMAIL"]
+  createdAt         DateTime  @default(now())
 
   @@index([userId])
   @@index([isRead])
@@ -340,4 +352,249 @@ model AuditLog {
 
   @@index([userId])
   @@index([entity, entityId])
+}
+
+model AIInteraction {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId String?
+  toolType       String
+  input          Json
+  output         Json
+  provider       String
+  timestamp      DateTime @default(now())
+
+  @@index([userId])
+  @@index([conversationId])
+}
+
+model VoiceNote {
+  id             String   @id @default(uuid())
+  doctorId       String
+  doctor         Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  consultationId String?
+  url            String
+  duration       Int
+  createdAt      DateTime @default(now())
+
+  @@index([doctorId])
+}
+
+model AISetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model PrescriptionTemplate {
+  id        String   @id @default(uuid())
+  doctorId  String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  name      String
+  items     Json     // Array of standardized prescription items
+  createdAt DateTime @default(now())
+
+  @@index([doctorId])
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// Phase 3: Smart Operations Extension
+// ─────────────────────────────────────────────────────────────
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  CLEANING
+}
+
+enum BedType {
+  ICU
+  GENERAL
+  PRIVATE
+}
+
+enum AmbulanceStatus {
+  AVAILABLE
+  REQUESTED
+  DISPATCHED
+  EN_ROUTE
+  ARRIVED
+  COMPLETED
+}
+
+enum BloodRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FULFILLED
+}
+
+enum QueueTokenStatus {
+  WAITING
+  CALLED
+  IN_CONSULTATION
+  COMPLETED
+  SKIPPED
+}
+
+// 3.1 Bed Management
+model Ward {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  beds        Bed[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Bed {
+  id               String          @id @default(uuid())
+  wardId           String
+  ward             Ward            @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  bedNumber        String
+  type             BedType         @default(GENERAL)
+  status           BedStatus       @default(AVAILABLE)
+  currentPatientId String?
+  currentPatient   Patient?        @relation("CurrentBed", fields: [currentPatientId], references: [id])
+  notes            String?
+  assignments      BedAssignment[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([wardId, bedNumber])
+  @@index([wardId])
+  @@index([status])
+  @@index([type])
+}
+
+model BedAssignment {
+  id           String    @id @default(uuid())
+  bedId        String
+  bed          Bed       @relation(fields: [bedId], references: [id], onDelete: Cascade)
+  patientId    String
+  patient      Patient   @relation("BedAssignments", fields: [patientId], references: [id])
+  admittedAt   DateTime  @default(now())
+  dischargedAt DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+
+  @@index([bedId])
+  @@index([patientId])
+}
+
+// 3.2 Ambulance Module
+model Ambulance {
+  id            String             @id @default(uuid())
+  vehicleNumber String             @unique
+  driverName    String
+  driverPhone   String
+  model         String?
+  status        AmbulanceStatus    @default(AVAILABLE)
+  notes         String?
+  requests      AmbulanceRequest[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model AmbulanceRequest {
+  id            String          @id @default(uuid())
+  ambulanceId   String?
+  ambulance     Ambulance?      @relation(fields: [ambulanceId], references: [id])
+  patientId     String?
+  patient       Patient?        @relation("AmbulanceRequests", fields: [patientId], references: [id])
+  requestedById String
+  pickupAddress String
+  destination   String          @default("NovaCare Hospital")
+  priority      String          @default("NORMAL")
+  status        AmbulanceStatus @default(REQUESTED)
+  notes         String?
+  requestedAt   DateTime        @default(now())
+  dispatchedAt  DateTime?
+  arrivedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([status])
+  @@index([patientId])
+}
+
+// 3.3 Blood Bank
+model BloodInventory {
+  id          String     @id @default(uuid())
+  bloodGroup  BloodGroup
+  units       Int        @default(0)
+  collectedAt DateTime   @default(now())
+  expiresAt   DateTime
+  location    String?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([bloodGroup])
+  @@index([expiresAt])
+}
+
+model Donor {
+  id               String     @id @default(uuid())
+  name             String
+  bloodGroup       BloodGroup
+  phone            String
+  email            String?
+  address          String?
+  lastDonationDate DateTime?
+  isEligible       Boolean    @default(true)
+  notes            String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@index([bloodGroup])
+}
+
+model BloodRequest {
+  id            String             @id @default(uuid())
+  patientId     String?
+  patient       Patient?           @relation("BloodRequests", fields: [patientId], references: [id])
+  requestedById String
+  department    String?
+  bloodGroup    BloodGroup
+  units         Int
+  urgency       String             @default("ROUTINE")
+  status        BloodRequestStatus @default(PENDING)
+  notes         String?
+  approvedAt    DateTime?
+  fulfilledAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([bloodGroup])
+  @@index([status])
+  @@index([patientId])
+}
+
+// 3.5 Live Queue System
+model QueueToken {
+  id                  String           @id @default(uuid())
+  tokenNumber         Int
+  doctorId            String
+  doctor              Doctor           @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointmentId       String?          @unique
+  appointment         Appointment?     @relation("AppointmentToken", fields: [appointmentId], references: [id])
+  patientId           String
+  patient             Patient          @relation("QueueTokens", fields: [patientId], references: [id])
+  status              QueueTokenStatus @default(WAITING)
+  calledAt            DateTime?
+  consultationEndedAt DateTime?
+  date                DateTime         @default(now())
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([status])
+  @@index([date])
 }
