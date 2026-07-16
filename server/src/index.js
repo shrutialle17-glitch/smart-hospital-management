@@ -25,6 +25,7 @@ import publicRoutes from './routes/public.routes.js';
 import departmentRoutes from './routes/department.routes.js';
 import bedRoutes from './routes/bed.routes.js';   
 import ambulanceRoutes from './routes/ambulance.routes.js';
+
 // We will import more routes here as we build them
 
 dotenv.config();
