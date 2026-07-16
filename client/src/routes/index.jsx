@@ -83,15 +83,77 @@ const AppRoutes = () => {
             </Route>
 
             {/* Doctor Routes */}
-            <Route element={<ProtectedRoute allowedRoles={["DOCTOR"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={['DOCTOR']} />}>
               <Route path="doctor" element={<DoctorDashboard />} />
+              <Route path="doctor/patients" element={
+                <GenericListPage 
+                  title="My Patients" 
+                  endpoint="/users?role=PATIENT" 
+                  columns={[
+                    { key: 'firstName', label: 'First Name' },
+                    { key: 'lastName', label: 'Last Name' },
+                    { key: 'phone', label: 'Phone' },
+                    { key: 'createdAt', label: 'Registered', render: (i, v) => new Date(v).toLocaleDateString() }
+                  ]}
+                />
+              } />
+              <Route path="doctor/schedule" element={
+                <GenericListPage 
+                  title="My Schedule" 
+                  endpoint="/appointments?limit=50" 
+                  columns={[
+                    { key: 'patient.user.firstName', label: 'Patient', render: (i) => `${i.patient.user.firstName} ${i.patient.user.lastName}` },
+                    { key: 'startTime', label: 'Date & Time', render: (i, v) => new Date(v).toLocaleString() },
+                    { key: 'status', label: 'Status', render: (i, v) => <span className={`px-2 py-1 text-xs font-bold rounded-full ${v === 'CONFIRMED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{v}</span> }
+                  ]}
+                />
+              } />
             </Route>
 
             {/* Patient Routes */}
-            <Route element={<ProtectedRoute allowedRoles={["PATIENT"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={['PATIENT']} />}>
               <Route path="patient" element={<PatientDashboard />} />
+              <Route path="patient/doctors" element={
+                <GenericListPage 
+                  title="Our Doctors" 
+                  endpoint="/public/doctors" 
+                  columns={[
+                    { key: 'firstName', label: 'Doctor', render: (i) => `Dr. ${i.firstName} ${i.lastName}` },
+                    { key: 'doctorProfile.department.name', label: 'Department' },
+                    { key: 'doctorProfile.experience', label: 'Experience', render: (i, v) => `${v} Years` },
+                    { key: 'doctorProfile.consultationFee', label: 'Fee', render: (i, v) => `₹${v}` },
+                    { key: 'id', label: 'Action', render: (i) => (
+                      <a href="/patient" className="px-4 py-2 text-xs font-bold bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40">
+                        Book
+                      </a>
+                    )}
+                  ]}
+                />
+              } />
+              <Route path="patient/appointments" element={
+                <GenericListPage 
+                  title="My Appointments" 
+                  endpoint="/appointments?limit=100" 
+                  columns={[
+                    { key: 'doctor.user.lastName', label: 'Doctor', render: (i) => `Dr. ${i.doctor.user.lastName}` },
+                    { key: 'startTime', label: 'Date & Time', render: (i, v) => new Date(v).toLocaleString() },
+                    { key: 'status', label: 'Status' }
+                  ]}
+                />
+              } />
+              <Route path="patient/records" element={
+                <GenericListPage 
+                  title="Medical Records" 
+                  endpoint="/lab/reports?limit=500" 
+                  columns={[
+                    { key: 'test.name', label: 'Test Name' },
+                    { key: 'status', label: 'Status' },
+                    { key: 'createdAt', label: 'Date', render: (i, v) => new Date(v).toLocaleDateString() }
+                  ]}
+                />
+              } />
             </Route>
-
+            
             {/* Receptionist Routes */}
             <Route element={<ProtectedRoute allowedRoles={["RECEPTIONIST"]} />}>
               <Route path="reception" element={<ReceptionistDashboard />} />
