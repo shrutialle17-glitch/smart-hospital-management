@@ -33,7 +33,7 @@ const PharmacistDashboard = lazy(() => import("../pages/pharmacist/PharmacistDas
 const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
 
 const BedManagement = lazy(() => import('../pages/admin/BedManagement'));
-
+const AmbulancePage = lazy(() => import('../pages/admin/AmbulancePage'));
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
@@ -82,15 +82,16 @@ const AppRoutes = () => {
             {/* Shared operations routes for Admin and Receptionist */}
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']} />}>
               <Route path="operations/beds" element={<BedManagement />} />
+              <Route path="operations/ambulance" element={<AmbulancePage />} />
             </Route>
 
             {/* Doctor Routes */}
             <Route element={<ProtectedRoute allowedRoles={['DOCTOR']} />}>
               <Route path="doctor" element={<DoctorDashboard />} />
               <Route path="doctor/patients" element={
-                <GenericListPage 
-                  title="My Patients" 
-                  endpoint="/users?role=PATIENT" 
+                <GenericListPage
+                  title="My Patients"
+                  endpoint="/users?role=PATIENT"
                   columns={[
                     { key: 'firstName', label: 'First Name' },
                     { key: 'lastName', label: 'Last Name' },
@@ -100,9 +101,9 @@ const AppRoutes = () => {
                 />
               } />
               <Route path="doctor/schedule" element={
-                <GenericListPage 
-                  title="My Schedule" 
-                  endpoint="/appointments?limit=50" 
+                <GenericListPage
+                  title="My Schedule"
+                  endpoint="/appointments?limit=50"
                   columns={[
                     { key: 'patient.user.firstName', label: 'Patient', render: (i) => `${i.patient.user.firstName} ${i.patient.user.lastName}` },
                     { key: 'startTime', label: 'Date & Time', render: (i, v) => new Date(v).toLocaleString() },
@@ -116,26 +117,28 @@ const AppRoutes = () => {
             <Route element={<ProtectedRoute allowedRoles={['PATIENT']} />}>
               <Route path="patient" element={<PatientDashboard />} />
               <Route path="patient/doctors" element={
-                <GenericListPage 
-                  title="Our Doctors" 
-                  endpoint="/public/doctors" 
+                <GenericListPage
+                  title="Our Doctors"
+                  endpoint="/public/doctors"
                   columns={[
                     { key: 'firstName', label: 'Doctor', render: (i) => `Dr. ${i.firstName} ${i.lastName}` },
                     { key: 'doctorProfile.department.name', label: 'Department' },
                     { key: 'doctorProfile.experience', label: 'Experience', render: (i, v) => `${v} Years` },
                     { key: 'doctorProfile.consultationFee', label: 'Fee', render: (i, v) => `₹${v}` },
-                    { key: 'id', label: 'Action', render: (i) => (
-                      <a href="/patient" className="px-4 py-2 text-xs font-bold bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40">
-                        Book
-                      </a>
-                    )}
+                    {
+                      key: 'id', label: 'Action', render: (i) => (
+                        <a href="/patient" className="px-4 py-2 text-xs font-bold bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40">
+                          Book
+                        </a>
+                      )
+                    }
                   ]}
                 />
               } />
               <Route path="patient/appointments" element={
-                <GenericListPage 
-                  title="My Appointments" 
-                  endpoint="/appointments?limit=100" 
+                <GenericListPage
+                  title="My Appointments"
+                  endpoint="/appointments?limit=100"
                   columns={[
                     { key: 'doctor.user.lastName', label: 'Doctor', render: (i) => `Dr. ${i.doctor.user.lastName}` },
                     { key: 'startTime', label: 'Date & Time', render: (i, v) => new Date(v).toLocaleString() },
@@ -144,9 +147,9 @@ const AppRoutes = () => {
                 />
               } />
               <Route path="patient/records" element={
-                <GenericListPage 
-                  title="Medical Records" 
-                  endpoint="/lab/reports?limit=500" 
+                <GenericListPage
+                  title="Medical Records"
+                  endpoint="/lab/reports?limit=500"
                   columns={[
                     { key: 'test.name', label: 'Test Name' },
                     { key: 'status', label: 'Status' },
@@ -155,7 +158,7 @@ const AppRoutes = () => {
                 />
               } />
             </Route>
-            
+
             {/* Receptionist Routes */}
             <Route element={<ProtectedRoute allowedRoles={["RECEPTIONIST"]} />}>
               <Route path="reception" element={<ReceptionistDashboard />} />
