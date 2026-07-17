@@ -26,7 +26,7 @@ import departmentRoutes from './routes/department.routes.js';
 import bedRoutes from './routes/bed.routes.js';   
 import ambulanceRoutes from './routes/ambulance.routes.js';
 import bloodBankRoutes from './routes/bloodBank.routes.js';
-
+import emergencyRoutes from './routes/emergency.routes.js'; 
 
 // We will import more routes here as we build them
 
@@ -78,6 +78,7 @@ app.use('/api/v1/departments', departmentRoutes);
 app.use('/api/v1/beds', bedRoutes);
 app.use('/api/v1/ambulance', ambulanceRoutes);
 app.use('/api/v1/blood-bank', bloodBankRoutes);
+app.use('/api/v1/emergency', emergencyRoutes); 
 
 // Health Check
 app.get('/health', (req, res) => {
