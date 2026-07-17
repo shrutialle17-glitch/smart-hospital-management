@@ -1,4 +1,5 @@
 import { prisma } from '../index.js';
+import { getMedicineIntelligence } from '../services/pharmacyAnalyticsService.js';
 
 export const getMedicines = async (req, res, next) => {
   try {
@@ -196,5 +197,14 @@ export const getCategories = async (req, res, next) => {
     res.status(200).json({ success: true, data: categories });
   } catch (error) {
     next(error);
+  }
+};
+
+export const getIntelligence = async (req, res, next) => {
+  try {
+    const data = await getMedicineIntelligence();
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
   }
 };
