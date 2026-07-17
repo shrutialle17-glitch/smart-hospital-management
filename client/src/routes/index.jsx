@@ -37,6 +37,7 @@ const PharmacistDashboard = lazy(
   () => import("../pages/pharmacist/PharmacistDashboard"),
 );
 const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
+const AIWorkspace = lazy(() => import('../pages/ai/AIWorkspace'));
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
@@ -237,6 +238,8 @@ const AppRoutes = () => {
                 />
               } />
             </Route>
+            {/* AI Workspace Route */}
+            <Route path="ai-assistant" element={<AIWorkspace />} />
           </Route>
 
           <Route

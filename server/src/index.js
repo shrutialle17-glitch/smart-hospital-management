@@ -23,6 +23,7 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import departmentRoutes from './routes/department.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 
 // We will import more routes here as we build them
 
@@ -71,6 +72,7 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/departments', departmentRoutes);
+app.use('/api/v1/ai', aiRoutes);
 
 
 // Health Check

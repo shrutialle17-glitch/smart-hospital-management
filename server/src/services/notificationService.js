@@ -1,170 +1,85 @@
 import { prisma } from '../index.js';
 
-/**
- * Notification Service
- * Centralised helper to create notifications from any controller.
- * Usage:
- *   import { notify, notifyMany, notifyAdmins } from '../services/notificationService.js';
- *   await notify(userId, 'Appointment Confirmed', 'Your appointment is confirmed for ...', 'APPOINTMENT');
- */
+// ---------------------------------------------------------
+// Notification Channels
+// ---------------------------------------------------------
 
-// ──────────────────────────────────────────────
-// Core: Send a notification to a single user
-// ──────────────────────────────────────────────
-export const notify = async (userId, title, message, type = 'SYSTEM') => {
-  try {
-    const notification = await prisma.notification.create({
+class InAppChannel {
+  async send(userId, payload) {
+    const { title, message, type, relatedEntityType, relatedEntityId } = payload;
+    
+    // Writes to the DB for the Notification Center drawer
+    await prisma.notification.create({
       data: {
         userId,
         title,
-        message,
-        type, // APPOINTMENT | LAB | PRESCRIPTION | BILLING | SYSTEM
-      },
+        message, // In Prisma schema, the body is stored in 'message'
+        type,
+        relatedEntityType,
+        relatedEntityId,
+        channelsSent: ['IN_APP']
+      }
     });
-    return notification;
-  } catch (error) {
-    // Log but don't throw — notifications should never break the main flow
-    console.error('[NotificationService] Failed to create notification:', error.message);
-    return null;
   }
-};
+}
 
-// ──────────────────────────────────────────────
-// Bulk: Send the same notification to many users
-// ──────────────────────────────────────────────
-export const notifyMany = async (userIds, title, message, type = 'SYSTEM') => {
-  try {
-    if (!userIds || userIds.length === 0) return [];
-
-    const data = userIds.map((userId) => ({
-      userId,
-      title,
-      message,
-      type,
-    }));
-
-    const result = await prisma.notification.createMany({ data });
-    return result;
-  } catch (error) {
-    console.error('[NotificationService] Failed to create bulk notifications:', error.message);
-    return null;
+class EmailChannel {
+  async send(userId, payload) {
+    // Stub for Phase 1. Ready for SendGrid/SES integration later.
+    // E.g., await sendgrid.send({...})
+    console.log(`[EmailChannel Stub] Email simulated for User ${userId}: ${payload.title}`);
   }
-};
+}
 
-// ──────────────────────────────────────────────
-// Convenience: Notify all admins
-// ──────────────────────────────────────────────
-export const notifyAdmins = async (title, message, type = 'SYSTEM') => {
-  try {
-    const admins = await prisma.user.findMany({
-      where: { role: 'ADMIN', isActive: true },
-      select: { id: true },
-    });
-
-    if (admins.length === 0) return null;
-
-    return await notifyMany(
-      admins.map((a) => a.id),
-      title,
-      message,
-      type
-    );
-  } catch (error) {
-    console.error('[NotificationService] Failed to notify admins:', error.message);
-    return null;
+class PushChannel {
+  async send(userId, payload) {
+    // Stub for FCM/APNs later.
+    console.log(`[PushChannel Stub] Push notification simulated for User ${userId}: ${payload.title}`);
   }
-};
+}
 
-// ──────────────────────────────────────────────
-// Convenience: Notify by role
-// ──────────────────────────────────────────────
-export const notifyByRole = async (role, title, message, type = 'SYSTEM') => {
-  try {
-    const users = await prisma.user.findMany({
-      where: { role, isActive: true },
-      select: { id: true },
-    });
 
-    if (users.length === 0) return null;
+// ---------------------------------------------------------
+// Core Notification Service
+// ---------------------------------------------------------
 
-    return await notifyMany(
-      users.map((u) => u.id),
-      title,
-      message,
-      type
-    );
-  } catch (error) {
-    console.error(`[NotificationService] Failed to notify role ${role}:`, error.message);
-    return null;
+class NotificationService {
+  constructor() {
+    this.channels = {
+      IN_APP: new InAppChannel(),
+      EMAIL: new EmailChannel(),
+      PUSH: new PushChannel()
+    };
   }
-};
 
-// ──────────────────────────────────────────────
-// Pre-built event helpers
-// ──────────────────────────────────────────────
+  /**
+   * Dispatches a notification through all configured channels.
+   * @param {string} userId - Target user
+   * @param {string} type - APPOINTMENT, LAB, PRESCRIPTION, BILLING, SYSTEM, VOICE_NOTE, CERTIFICATE
+   * @param {object} payload - { title, message, relatedEntityType, relatedEntityId }
+   */
+  async send(userId, type, payload) {
+    // Determine active channels from env (default to IN_APP)
+    const activeChannelsStr = process.env.NOTIFICATION_CHANNELS || 'IN_APP';
+    const activeChannels = activeChannelsStr.split(',').map(c => c.trim().toUpperCase());
+    
+    const augmentedPayload = { ...payload, type };
+    const channelsSuccessfullySent = [];
 
-export const notifyAppointmentBooked = async (patientUserId, doctorUserId, dateTime) => {
-  const formattedDate = new Date(dateTime).toLocaleString('en-IN', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
+    // Fan-out to each active channel
+    for (const channelKey of activeChannels) {
+      if (this.channels[channelKey]) {
+        try {
+          await this.channels[channelKey].send(userId, augmentedPayload);
+          channelsSuccessfullySent.push(channelKey);
+        } catch (error) {
+          console.error(`Failed to send notification via ${channelKey}:`, error);
+        }
+      }
+    }
 
-  // Notify patient
-  await notify(
-    patientUserId,
-    'Appointment Booked',
-    `Your appointment has been scheduled for ${formattedDate}.`,
-    'APPOINTMENT'
-  );
+    return channelsSuccessfullySent;
+  }
+}
 
-  // Notify doctor
-  await notify(
-    doctorUserId,
-    'New Appointment',
-    `A new appointment has been booked for ${formattedDate}.`,
-    'APPOINTMENT'
-  );
-};
-
-export const notifyAppointmentCancelled = async (patientUserId, doctorUserId, reason) => {
-  const msg = reason ? `Reason: ${reason}` : 'No reason provided.';
-
-  await notify(patientUserId, 'Appointment Cancelled', `Your appointment was cancelled. ${msg}`, 'APPOINTMENT');
-  await notify(doctorUserId, 'Appointment Cancelled', `An appointment was cancelled. ${msg}`, 'APPOINTMENT');
-};
-
-export const notifyLabReportReady = async (patientUserId, testName) => {
-  await notify(
-    patientUserId,
-    'Lab Report Ready',
-    `Your ${testName} lab report is now available. View it in your medical records.`,
-    'LAB'
-  );
-};
-
-export const notifyPrescriptionCreated = async (patientUserId, doctorName) => {
-  await notify(
-    patientUserId,
-    'New Prescription',
-    `Dr. ${doctorName} has written a new prescription for you.`,
-    'PRESCRIPTION'
-  );
-};
-
-export const notifyBillGenerated = async (patientUserId, amount) => {
-  await notify(
-    patientUserId,
-    'New Bill Generated',
-    `A new bill of ₹${Number(amount).toFixed(2)} has been generated. Please check your billing section.`,
-    'BILLING'
-  );
-};
-
-export const notifyPaymentReceived = async (patientUserId, amount) => {
-  await notify(
-    patientUserId,
-    'Payment Received',
-    `Your payment of ₹${Number(amount).toFixed(2)} has been recorded successfully. Thank you!`,
-    'BILLING'
-  );
-};
+export const notificationService = new NotificationService();
