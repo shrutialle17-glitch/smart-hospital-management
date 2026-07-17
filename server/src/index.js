@@ -27,6 +27,7 @@ import bedRoutes from './routes/bed.routes.js';
 import ambulanceRoutes from './routes/ambulance.routes.js';
 import bloodBankRoutes from './routes/bloodBank.routes.js';
 
+
 // We will import more routes here as we build them
 
 dotenv.config();
