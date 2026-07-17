@@ -1,0 +1,11 @@
+import express from 'express';
+import { createOrder, verifyPayment } from '../controllers/paymentController.js';
+import { isAuthenticated } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
+
+// Both patients and admins might need to create orders
+router.post('/create-order', isAuthenticated, createOrder);
+router.post('/verify', isAuthenticated, verifyPayment);
+
+export default router;

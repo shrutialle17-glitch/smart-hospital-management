@@ -4,6 +4,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+
+dotenv.config();
+
 import pg from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
@@ -24,10 +27,9 @@ import notificationRoutes from './routes/notification.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import departmentRoutes from './routes/department.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 // We will import more routes here as we build them
-
-dotenv.config();
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -73,7 +75,7 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/departments', departmentRoutes);
 app.use('/api/v1/ai', aiRoutes);
-
+app.use('/api/v1/payments', paymentRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

@@ -40,7 +40,7 @@ const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
 const AIWorkspace = lazy(() => import('../pages/ai/AIWorkspace'));
 const PharmacyAnalytics = lazy(() => import('../pages/pharmacist/PharmacyAnalytics'));
 const MedicineIntelligence = lazy(() => import('../pages/pharmacist/MedicineIntelligence'));
-
+const HospitalMapPage = lazy(() => import('../pages/HospitalMapPage'));
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
@@ -273,6 +273,8 @@ const AppRoutes = () => {
             </Route>
             {/* AI Workspace Route */}
             <Route path="ai-assistant" element={<AIWorkspace />} />
+            {/* Map Route */}
+            <Route path="facility-map" element={<HospitalMapPage />} />
           </Route>
 
           <Route
