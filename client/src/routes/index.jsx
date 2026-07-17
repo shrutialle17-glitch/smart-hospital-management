@@ -27,16 +27,13 @@ const HomeRoute = () => {
 //Dashboards
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const DoctorDashboard = lazy(() => import("../pages/doctor/DoctorDashboard"));
-const PatientDashboard = lazy(
-  () => import("../pages/patient/PatientDashboard"),
-);
-const ReceptionistDashboard = lazy(
-  () => import("../pages/receptionist/ReceptionistDashboard"),
-);
-const PharmacistDashboard = lazy(
-  () => import("../pages/pharmacist/PharmacistDashboard"),
-);
+const PatientDashboard = lazy(() => import("../pages/patient/PatientDashboard"),);
+const ReceptionistDashboard = lazy(() => import("../pages/receptionist/ReceptionistDashboard"),);
+const PharmacistDashboard = lazy(() => import("../pages/pharmacist/PharmacistDashboard"),);
 const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
+
+const BedManagement = lazy(() => import('../pages/admin/BedManagement'));
+
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
@@ -80,6 +77,11 @@ const AppRoutes = () => {
             {/* Admin Routes */}
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
               <Route path="admin" element={<AdminDashboard />} />
+            </Route>
+
+            {/* Shared operations routes for Admin and Receptionist */}
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']} />}>
+              <Route path="operations/beds" element={<BedManagement />} />
             </Route>
 
             {/* Doctor Routes */}
