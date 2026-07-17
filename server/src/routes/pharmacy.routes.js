@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMedicines, addMedicine, updateStock, getCategories, getPrescriptions, createPrescription, updatePrescriptionStatus } from '../controllers/pharmacyController.js';
+import { getMedicines, addMedicine, updateStock, getCategories, getPrescriptions, createPrescription, updatePrescriptionStatus, getAnalytics, getIntelligence } from '../controllers/pharmacyController.js';
 import { isAuthenticated, hasRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -15,5 +15,9 @@ router.patch('/medicines/:id/stock', hasRole(['ADMIN', 'PHARMACIST']), updateSto
 router.get('/prescriptions', hasRole(['ADMIN', 'PHARMACIST', 'DOCTOR', 'PATIENT']), getPrescriptions);
 router.post('/prescriptions', hasRole(['ADMIN', 'DOCTOR']), createPrescription);
 router.patch('/prescriptions/:id/status', hasRole(['ADMIN', 'PHARMACIST']), updatePrescriptionStatus);
+
+// Phase 3 Analytics
+router.get('/analytics', hasRole(['ADMIN', 'PHARMACIST']), getAnalytics);
+router.get('/intelligence', hasRole(['ADMIN', 'PHARMACIST']), getIntelligence);
 
 export default router;
