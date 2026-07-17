@@ -34,6 +34,7 @@ const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
 
 const BedManagement = lazy(() => import('../pages/admin/BedManagement'));
 const AmbulancePage = lazy(() => import('../pages/admin/AmbulancePage'));
+const BloodBankPage = lazy(() => import('../pages/admin/BloodBankPage'));
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
@@ -83,6 +84,9 @@ const AppRoutes = () => {
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']} />}>
               <Route path="operations/beds" element={<BedManagement />} />
               <Route path="operations/ambulance" element={<AmbulancePage />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'LAB_STAFF']} />}>
+              <Route path="operations/blood-bank" element={<BloodBankPage />} />
             </Route>
 
             {/* Doctor Routes */}
