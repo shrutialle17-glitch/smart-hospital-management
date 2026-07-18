@@ -123,7 +123,7 @@ async function main() {
     } else {
       patUser = await prisma.user.findUnique({ where: { email }, include: { patientProfile: true } });
     }
-    patients.push(patUser.patientProfile);
+    patients.push({ ...patUser.patientProfile, user: patUser });
   }
 
   // 6. Create Medicine Categories (4+)
@@ -412,6 +412,89 @@ async function main() {
     for (const t of tokenData) {
       await prisma.queueToken.create({ data: t });
     }
+  }
+
+  // 18. Organ Donation Registry
+  console.log('Seeding organ donation registry...');
+  const donorCount18 = await prisma.organDonor.count();
+  if (donorCount18 === 0) {
+    const adminUser18 = await prisma.user.findUnique({ where: { email: 'admin@novacare.com' } });
+    
+    // Create 3 Donors
+    const d1 = await prisma.organDonor.create({
+      data: {
+        patientId: patients[5].id,
+        firstName: patients[5].user.firstName,
+        lastName: patients[5].user.lastName,
+        bloodGroup: 'O_POS',
+        organ: 'Kidney',
+        contactNumber: '9988776655',
+        status: 'PENDING',
+        registeredById: adminUser18.id
+      }
+    });
+    const d2 = await prisma.organDonor.create({
+      data: {
+        patientId: patients[6].id,
+        firstName: patients[6].user.firstName,
+        lastName: patients[6].user.lastName,
+        bloodGroup: 'A_NEG',
+        organ: 'Liver',
+        contactNumber: '9988776656',
+        status: 'APPROVED',
+        registeredById: adminUser18.id
+      }
+    });
+    const d3 = await prisma.organDonor.create({
+      data: {
+        patientId: patients[7].id,
+        firstName: patients[7].user.firstName,
+        lastName: patients[7].user.lastName,
+        bloodGroup: 'B_POS',
+        organ: 'Heart',
+        contactNumber: '9988776657',
+        status: 'MATCHED',
+        registeredById: adminUser18.id
+      }
+    });
+
+    // Create 3 Recipients
+    const r1 = await prisma.organRecipient.create({
+      data: {
+        patientId: patients[8].id,
+        firstName: patients[8].user.firstName,
+        lastName: patients[8].user.lastName,
+        bloodGroup: 'O_POS',
+        organ: 'Kidney',
+        urgency: 'CRITICAL',
+        contactNumber: '9988776658',
+        status: 'PENDING',
+        registeredById: adminUser18.id
+      }
+    });
+    const r2 = await prisma.organRecipient.create({
+      data: {
+        patientId: patients[9].id,
+        firstName: patients[9].user.firstName,
+        lastName: patients[9].user.lastName,
+        bloodGroup: 'B_POS',
+        organ: 'Heart',
+        urgency: 'CRITICAL',
+        contactNumber: '9988776659',
+        status: 'APPROVED',
+        registeredById: adminUser18.id
+      }
+    });
+
+    // Create 1 Match
+    await prisma.organMatch.create({
+      data: {
+        donorId: d3.id,
+        recipientId: r2.id,
+        status: 'PENDING',
+        notes: 'HLH matched. Awaiting final board approval.'
+      }
+    });
   }
 
   console.log('Seeding completed successfully!');

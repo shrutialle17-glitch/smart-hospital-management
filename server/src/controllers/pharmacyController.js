@@ -1,4 +1,5 @@
 import { prisma } from '../index.js';
+import { notificationService } from '../services/notificationService.js';
 
 export const getMedicines = async (req, res, next) => {
   try {
@@ -176,8 +177,16 @@ export const updatePrescriptionStatus = async (req, res, next) => {
 
     const prescription = await prisma.prescription.update({
       where: { id },
-      data: { status }
+      data: { status },
+      include: { patient: true }
     });
+
+    if (status === 'FULFILLED') {
+      await notificationService.send(prescription.patient.userId, 'PRESCRIPTION', {
+        title: 'Prescription Ready',
+        message: 'Your prescribed medicines have been successfully dispensed by the pharmacy.'
+      });
+    }
 
     res.status(200).json({ success: true, data: prescription });
   } catch (error) {

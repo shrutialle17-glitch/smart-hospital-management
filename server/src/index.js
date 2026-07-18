@@ -28,6 +28,7 @@ import publicRoutes from './routes/public.routes.js';
 import departmentRoutes from './routes/department.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
+import hospitalSettingsRoutes from './routes/hospitalSettings.routes.js';
 
 // We will import more routes here as we build them
 
@@ -76,6 +77,7 @@ app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/departments', departmentRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/hospital-settings', hospitalSettingsRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

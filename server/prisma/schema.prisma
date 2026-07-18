@@ -60,6 +60,10 @@ model User {
   notifications Notification[]
   auditLogs     AuditLog[]
   aiInteractions AIInteraction[]
+
+  organDonorsRegistered     OrganDonor[]     @relation("RegisteredOrganDonors")
+  organRecipientsRegistered OrganRecipient[] @relation("RegisteredOrganRecipients")
+  organMatchesApproved      OrganMatch[]     @relation("MatchApprover")
 }
 
 model Admin {
@@ -114,6 +118,8 @@ model Patient {
   ambulanceRequests AmbulanceRequest[] @relation("AmbulanceRequests")
   bloodRequests  BloodRequest[]    @relation("BloodRequests")
   queueTokens    QueueToken[]      @relation("QueueTokens")
+  organDonors    OrganDonor[]      @relation("OrganDonors")
+  organRecipients OrganRecipient[] @relation("OrganRecipients")
 }
 
 model LabStaff {
@@ -597,4 +603,70 @@ model QueueToken {
   @@index([patientId])
   @@index([status])
   @@index([date])
+}
+
+// 3.6 Organ Donation Registry
+model OrganDonor {
+  id             String        @id @default(uuid())
+  patientId      String?
+  patient        Patient?      @relation("OrganDonors", fields: [patientId], references: [id])
+  firstName      String
+  lastName       String
+  bloodGroup     BloodGroup
+  organ          String
+  contactNumber  String
+  status         String        @default("PENDING") // PENDING, APPROVED, REJECTED, MATCHED
+  registeredById String
+  registeredBy   User          @relation("RegisteredOrganDonors", fields: [registeredById], references: [id])
+  matches        OrganMatch[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([bloodGroup])
+  @@index([status])
+}
+
+model OrganRecipient {
+  id             String        @id @default(uuid())
+  patientId      String?
+  patient        Patient?      @relation("OrganRecipients", fields: [patientId], references: [id])
+  firstName      String
+  lastName       String
+  bloodGroup     BloodGroup
+  organ          String
+  urgency        String        @default("NORMAL") // NORMAL, CRITICAL
+  contactNumber  String
+  status         String        @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, MATCHED, COMPLETED
+  registeredById String
+  registeredBy   User          @relation("RegisteredOrganRecipients", fields: [registeredById], references: [id])
+  matches        OrganMatch[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([bloodGroup])
+  @@index([status])
+}
+
+model OrganMatch {
+  id             String         @id @default(uuid())
+  donorId        String
+  donor          OrganDonor     @relation(fields: [donorId], references: [id])
+  recipientId    String
+  recipient      OrganRecipient @relation(fields: [recipientId], references: [id])
+  status         String         @default("PENDING") // PENDING, APPROVED, REJECTED, COMPLETED
+  approverId     String?
+  approver       User?          @relation(name: "MatchApprover", fields: [approverId], references: [id])
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([status])
+}
+
+// System Configuration
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }

@@ -6,7 +6,8 @@ import { Users, Calendar, TestTube, Package, DollarSign, Plus, Edit2, Trash2, X,
 import toast from 'react-hot-toast';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import api from '../../services/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -49,13 +50,7 @@ const AdminDashboard = () => {
   const [deleteStaffId, setDeleteStaffId] = useState(null);
   const [deleteDeptId, setDeleteDeptId] = useState(null);
 
-  // Mock State for settings
-  const [settings, setSettings] = useState({
-    hospitalName: 'MediCore Smart Hospital',
-    email: 'contact@medicore.com',
-    emergencyPhone: '+1-800-MED-911',
-    maxAppointments: '20'
-  });
+  const [settingsForm, setSettingsForm] = useState(null);
 
   const { data: metrics, isLoading: loadingMetrics, isError } = useQuery({
     queryKey: ['adminMetrics'],
@@ -74,6 +69,19 @@ const AdminDashboard = () => {
       return data.data;
     }
   });
+
+  const { data: hospitalSettingsData, isLoading: loadingHospitalSettings } = useQuery({
+    queryKey: ['hospitalSettings'],
+    queryFn: async () => (await api.get('/hospital-settings')).data.data,
+    enabled: activeTab === 'settings'
+  });
+
+  // Sync hospital settings into local editable form when loaded
+  useEffect(() => {
+    if (hospitalSettingsData && !settingsForm) {
+      setSettingsForm(hospitalSettingsData);
+    }
+  }, [hospitalSettingsData]);
 
   const addDeptMutation = useMutation({
     mutationFn: (newDept) => api.post('/departments', newDept),
@@ -106,6 +114,15 @@ const AdminDashboard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(['adminStaff']);
     }
+  });
+
+  const updateHospitalSettingsMutation = useMutation({
+    mutationFn: (data) => api.put('/hospital-settings', data),
+    onSuccess: () => {
+      toast.success('Settings saved and persisted successfully.');
+      queryClient.invalidateQueries(['hospitalSettings']);
+    },
+    onError: () => toast.error('Failed to save settings.')
   });
 
   const handleAddStaff = (e) => {
@@ -436,29 +453,44 @@ const AdminDashboard = () => {
               <CardTitle>Global Hospital Settings</CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-4" onSubmit={e => { e.preventDefault(); toast.success('Settings successfully updated across the platform!'); }}>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-600 uppercase">Hospital Name</label>
-                  <input type="text" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm" value={settings.hospitalName} onChange={e => setSettings({...settings, hospitalName: e.target.value})} />
+              {loadingHospitalSettings || !settingsForm ? (
+                <div className="space-y-3 animate-pulse">
+                  {[1,2,3,4].map(i => <div key={i} className="h-10 bg-gray-100 rounded-lg" />)}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+              ) : (
+                <form className="space-y-4" onSubmit={e => {
+                  e.preventDefault();
+                  updateHospitalSettingsMutation.mutate(settingsForm);
+                }}>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-600 uppercase">Support Email</label>
-                    <input type="email" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm" value={settings.email} onChange={e => setSettings({...settings, email: e.target.value})} />
+                    <label className="text-xs font-semibold text-gray-600 uppercase">Hospital Name</label>
+                    <input type="text" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm"
+                      value={settingsForm.hospitalName || ''} onChange={e => setSettingsForm({...settingsForm, hospitalName: e.target.value})} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-600 uppercase">Support Email</label>
+                      <input type="email" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm"
+                        value={settingsForm.supportEmail || ''} onChange={e => setSettingsForm({...settingsForm, supportEmail: e.target.value})} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-600 uppercase">Emergency Hotline</label>
+                      <input type="text" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm"
+                        value={settingsForm.emergencyPhone || ''} onChange={e => setSettingsForm({...settingsForm, emergencyPhone: e.target.value})} />
+                    </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-600 uppercase">Emergency Hotline</label>
-                    <input type="text" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm" value={settings.emergencyPhone} onChange={e => setSettings({...settings, emergencyPhone: e.target.value})} />
+                    <label className="text-xs font-semibold text-gray-600 uppercase">Max Daily Appointments (Per Doctor)</label>
+                    <input type="number" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm"
+                      value={settingsForm.maxAppointmentsPerDoctor || ''} onChange={e => setSettingsForm({...settingsForm, maxAppointmentsPerDoctor: e.target.value})} />
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-600 uppercase">Max Daily Appointments (Per Doctor)</label>
-                  <input type="number" className="w-full p-2.5 border border-gray-200 rounded-lg text-sm" value={settings.maxAppointments} onChange={e => setSettings({...settings, maxAppointments: e.target.value})} />
-                </div>
-                <div className="pt-4 flex justify-end border-t border-gray-100 mt-6">
-                  <Button type="submit">Save Global Settings</Button>
-                </div>
-              </form>
+                  <div className="pt-4 flex justify-end border-t border-gray-100 mt-6">
+                    <Button type="submit" disabled={updateHospitalSettingsMutation.isPending}>
+                      {updateHospitalSettingsMutation.isPending ? 'Saving...' : 'Save Global Settings'}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </CardContent>
           </Card>
         </div>
