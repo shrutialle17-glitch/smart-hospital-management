@@ -3,7 +3,7 @@ import { prisma } from '../index.js';
 // GET /api/v1/beds/wards — ward occupancy summary
 export const getWards = async (req, res, next) => {
   try {
-    const wards = await prisma.ward.findMany({  
+    const wards = await prisma.ward.findMany({
       include: {
         beds: {
           select: { id: true, bedNumber: true, type: true, status: true, currentPatientId: true }
