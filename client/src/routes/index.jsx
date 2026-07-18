@@ -35,6 +35,9 @@ const LabDashboard = lazy(() => import("../pages/lab/LabDashboard"));
 const BedManagement = lazy(() => import('../pages/admin/BedManagement'));
 const AmbulancePage = lazy(() => import('../pages/admin/AmbulancePage'));
 const BloodBankPage = lazy(() => import('../pages/admin/BloodBankPage'));
+const EmergencySOS = lazy(() => import('../pages/admin/EmergencySOS'));
+const OrganDonationPage = lazy(() => import('../pages/admin/OrganDonationPage'));
+const MedicineIntelligence = lazy(() => import('../pages/pharmacist/MedicineIntelligence'));
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
@@ -84,9 +87,11 @@ const AppRoutes = () => {
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']} />}>
               <Route path="operations/beds" element={<BedManagement />} />
               <Route path="operations/ambulance" element={<AmbulancePage />} />
+              <Route path="operations/emergency" element={<EmergencySOS />} />
             </Route>
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'LAB_STAFF']} />}>
               <Route path="operations/blood-bank" element={<BloodBankPage />} />
+              <Route path="operations/organ-donation" element={<OrganDonationPage />} />
             </Route>
 
             {/* Doctor Routes */}
@@ -221,6 +226,7 @@ const AppRoutes = () => {
               } />
             </Route>
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'PHARMACIST']} />}>
+              <Route path="pharmacy/intelligence" element={<MedicineIntelligence />} />
               <Route path="pharmacy/inventory" element={
                 <GenericListPage
                   title="Pharmacy Inventory"

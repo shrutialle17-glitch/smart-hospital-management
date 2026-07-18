@@ -11,16 +11,16 @@ const router = express.Router();
 router.use(isAuthenticated);
 
 // Donors
-router.get('/donors', hasRole(['ADMIN', 'DOCTOR', 'RECEPTIONIST']), getDonors);
-router.post('/donors', hasRole(['ADMIN', 'DOCTOR']), createDonor);
+router.get('/donors', hasRole(['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_STAFF']), getDonors);
+router.post('/donors', hasRole(['ADMIN', 'DOCTOR','LAB_STAFF']), createDonor);
 
 // Recipients
-router.get('/recipients', hasRole(['ADMIN', 'DOCTOR', 'RECEPTIONIST']), getRecipients);
-router.post('/recipients', hasRole(['ADMIN', 'DOCTOR']), createRecipient);
+router.get('/recipients', hasRole(['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_STAFF']), getRecipients);
+router.post('/recipients', hasRole(['ADMIN', 'DOCTOR','LAB_STAFF']), createRecipient);
 
 // Matches
-router.get('/matches', hasRole(['ADMIN', 'DOCTOR', 'RECEPTIONIST']), getMatches);
-router.post('/matches', hasRole(['ADMIN', 'DOCTOR']), createMatch);
+router.get('/matches', hasRole(['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_STAFF']), getMatches);
+router.post('/matches', hasRole(['ADMIN', 'DOCTOR','LAB_STAFF']), createMatch);
 router.patch('/matches/:id', hasRole(['ADMIN']), updateMatchStatus);
 
 export default router;
