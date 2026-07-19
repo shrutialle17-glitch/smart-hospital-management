@@ -34,6 +34,10 @@ import ambulanceRoutes from './routes/ambulance.routes.js';
 import bloodBankRoutes from './routes/bloodBank.routes.js';
 import emergencyRoutes from './routes/emergency.routes.js'; 
 import organDonationRoutes from './routes/organDonation.routes.js'; 
+import doctorWorkspaceRoutes from './routes/doctorWorkspace.routes.js';
+import queueRoutes from './routes/queue.routes.js';
+import voiceNoteRoutes from './routes/voiceNote.routes.js';
+
 
 // We will import more routes here as we build them
 
@@ -88,6 +92,9 @@ app.use('/api/v1/ambulance', ambulanceRoutes);
 app.use('/api/v1/blood-bank', bloodBankRoutes);
 app.use('/api/v1/emergency', emergencyRoutes); 
 app.use('/api/v1/organ-donation', organDonationRoutes);
+app.use('/api/v1/doctor-workspace', doctorWorkspaceRoutes);
+app.use('/api/v1/queue', queueRoutes);
+app.use('/api/v1/voice-notes', voiceNoteRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

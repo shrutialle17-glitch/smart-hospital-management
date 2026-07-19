@@ -1,12 +1,6 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  Outlet,
-} from "react-router-dom";
-import { useAuthStore } from "../store/authStore";
-import { Suspense, lazy } from "react";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { Suspense, lazy } from 'react';
 
 // Shell Layout
 import MainLayout from "../layouts/MainLayout";
@@ -44,6 +38,9 @@ const OrganDonationPage = lazy(() => import('../pages/admin/OrganDonationPage'))
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
+
+const DoctorQueue = lazy(() => import('../pages/doctor/DoctorQueue'));
+const QueueStatus = lazy(() => import('../pages/patient/QueueStatus'));
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { isAuthenticated, user } = useAuthStore();
@@ -100,6 +97,7 @@ const AppRoutes = () => {
             {/* Doctor Routes */}
             <Route element={<ProtectedRoute allowedRoles={['DOCTOR']} />}>
               <Route path="doctor" element={<DoctorDashboard />} />
+              <Route path="doctor/live-queue" element={<DoctorQueue />} />
               <Route path="doctor/patients" element={
                 <GenericListPage
                   title="My Patients"
@@ -128,6 +126,7 @@ const AppRoutes = () => {
             {/* Patient Routes */}
             <Route element={<ProtectedRoute allowedRoles={['PATIENT']} />}>
               <Route path="patient" element={<PatientDashboard />} />
+              <Route path="patient/queue-status" element={<QueueStatus />} />
               <Route path="patient/doctors" element={
                 <GenericListPage
                   title="Our Doctors"
@@ -170,7 +169,6 @@ const AppRoutes = () => {
                 />
               } />
             </Route>
-
             {/* Receptionist Routes */}
             <Route element={<ProtectedRoute allowedRoles={["RECEPTIONIST"]} />}>
               <Route path="reception" element={<ReceptionistDashboard />} />

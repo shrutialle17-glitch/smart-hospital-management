@@ -151,7 +151,6 @@ const PatientDashboard = () => {
       rzp1.open();
     },
     onError: (err) => {
-      console.error(err);
       toast.error(err.response?.data?.error?.message || "Failed to initiate payment.");
     }
   });

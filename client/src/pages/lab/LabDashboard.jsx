@@ -27,14 +27,26 @@ const LabDashboard = () => {
   });
 
   const uploadMutation = useMutation({
-    mutationFn: (data) => {
+    mutationFn: async (data) => {
       const formData = new FormData();
       formData.append('status', 'COMPLETED');
       formData.append('result', data.result);
       if (data.file) formData.append('report', data.file);
-
-      return api.patch(`/lab/reports/${data.id}`, formData, {
+      
+      // Upload report
+      await api.patch(`/lab/reports/${data.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      // Generate the Lab Bill automatically
+      await api.post('/billing', {
+        patientId: selectedReport.patientId,
+        items: [{
+          description: `Laboratory Charge: ${selectedReport.test.name}`,
+          amount: 150.00, // Standard lab charge
+          quantity: 1,
+          type: 'LAB'
+        }]
       });
     },
     onSuccess: () => {
@@ -98,9 +110,9 @@ const LabDashboard = () => {
                     </div>
                   </div>
                   <div className="mt-4 sm:mt-0 flex items-center gap-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
                       className="bg-surface border-gray-200 dark:border-gray-800"
                       onClick={() => {
                         setSelectedDetails(report);
@@ -118,18 +130,18 @@ const LabDashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-10 text-gray-500">
-              <TestTube size={40} className="mx-auto text-gray-300 mb-3" />
-              <p className="text-lg font-medium text-gray-700">No pending requests</p>
-              <p className="text-sm">The laboratory queue is currently empty.</p>
-            </div>
+             <div className="text-center py-10 text-gray-500">
+               <TestTube size={40} className="mx-auto text-gray-300 mb-3" />
+               <p className="text-lg font-medium text-gray-700">No pending requests</p>
+               <p className="text-sm">The laboratory queue is currently empty.</p>
+             </div>
           )}
         </CardContent>
       </Card>
 
       {/* Upload Result Modal */}
       {isUploadOpen && selectedReport && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-gray-900/50 z-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-md shadow-2xl">
             <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100 pb-4">
               <CardTitle>Upload Lab Result</CardTitle>
@@ -147,11 +159,11 @@ const LabDashboard = () => {
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-gray-600 uppercase">File Upload (PDF)</label>
                   <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center bg-gray-50/50">
-                    <input
-                      type="file"
-                      accept=".pdf,.png,.jpg"
+                    <input 
+                      type="file" 
+                      accept=".pdf,.png,.jpg" 
                       className="w-full text-sm"
-                      onChange={e => setUploadData({ ...uploadData, file: e.target.files[0] })}
+                      onChange={e => setUploadData({...uploadData, file: e.target.files[0]})}
                     />
                     {uploadData.file && (
                       <div className="text-success text-sm font-medium mt-2 flex items-center justify-center gap-2">
@@ -163,7 +175,7 @@ const LabDashboard = () => {
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-gray-600 uppercase">Lab Notes / Result Summary</label>
-                  <textarea required className="w-full p-2 border border-gray-200 rounded-lg text-sm h-24" placeholder="Enter key findings..." value={uploadData.result} onChange={e => setUploadData({ ...uploadData, result: e.target.value })}></textarea>
+                  <textarea required className="w-full p-2 border border-gray-200 rounded-lg text-sm h-24" placeholder="Enter key findings..." value={uploadData.result} onChange={e => setUploadData({...uploadData, result: e.target.value})}></textarea>
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3">
@@ -180,7 +192,7 @@ const LabDashboard = () => {
 
       {/* View Details Modal */}
       {isDetailsOpen && selectedDetails && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-gray-900/50 z-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-md shadow-2xl">
             <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100 pb-4">
               <CardTitle>Test Request Details</CardTitle>
@@ -193,7 +205,7 @@ const LabDashboard = () => {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Requested Test</p>
                 <p className="font-medium text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100">{selectedDetails.test.name}</p>
               </div>
-
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Patient</p>
@@ -201,7 +213,7 @@ const LabDashboard = () => {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Prescribing Doctor</p>
-                  <p className="font-medium text-gray-900">{selectedDetails.doctor}</p>
+                  <p className="font-medium text-gray-900">Not tracked</p>
                 </div>
               </div>
 
@@ -214,7 +226,7 @@ const LabDashboard = () => {
 
               <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 mt-6">
                 <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Close</Button>
-                <Button
+                <Button 
                   onClick={() => {
                     setIsDetailsOpen(false);
                     setSelectedReport(selectedDetails);

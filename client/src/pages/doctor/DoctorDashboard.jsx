@@ -3,11 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import { Calendar as CalendarIcon, Clock, User, FileText, Pill, History, CalendarPlus, X, TestTube } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, FileText, Pill, History, CalendarPlus, X, TestTube, FileBadge, Mic, Square } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
 
 const fetchAppointments = async () => {
   const { data } = await api.get('/appointments', {
@@ -20,11 +21,103 @@ const DoctorDashboard = () => {
   const queryClient = useQueryClient();
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [activeTab, setActiveTab] = useState('diagnosis');
-  const [medicines, setMedicines] = useState([{ name: '', dosage: '', duration: '' }]);
+  const [medicines, setMedicines] = useState([{ medicineId: '', dosage: '', frequency: '', duration: '' }]);
   const [followupDate, setFollowupDate] = useState('');
   const [followupNotes, setFollowupNotes] = useState('');
   const [labTestName, setLabTestName] = useState('');
+  const [certDays, setCertDays] = useState(3);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [uploadingVoice, setUploadingVoice] = useState(false);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      let audioChunks = [];
+      
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+      
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'voice_note.webm');
+        formData.append('consultationId', selectedAppt.id);
+        
+        setUploadingVoice(true);
+        try {
+          await api.post('/voice-notes/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          toast.success("Voice note successfully uploaded to patient record!");
+        } catch (error) {
+          toast.error("Failed to upload voice note.");
+        } finally {
+          setUploadingVoice(false);
+          stream.getTracks().forEach(t => t.stop());
+        }
+      };
+      
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (err) {
+      toast.error("Microphone access denied or not available.");
+    }
+  };
+  
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const generateCertificate = async () => {
+    if (!selectedAppt) return;
+    const doc = new jsPDF();
+    const patientName = `${selectedAppt.patient.user.firstName} ${selectedAppt.patient.user.lastName}`;
+    
+    doc.setFontSize(22);
+    doc.setTextColor(15, 118, 110);
+    doc.text("MEDICAL CERTIFICATE", 105, 30, null, null, "center");
+    
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Date: ${format(new Date(), 'MMM dd, yyyy')}`, 150, 45);
+    
+    doc.text(`To Whom It May Concern,`, 20, 65);
+    
+    const body = `This is to certify that ${patientName} has been examined by me on ${format(new Date(), 'MMM dd, yyyy')}. It is recommended that they rest for ${certDays} day(s) due to medical reasons starting from today.`;
+    const splitBody = doc.splitTextToSize(body, 170);
+    doc.text(splitBody, 20, 80);
+    
+    doc.text(`Doctor: Dr. ${selectedAppt.doctor.user.lastName}`, 20, 140);
+    doc.text(`Signature: _______________________`, 20, 160);
+    
+    doc.save(`${patientName.replace(' ', '_')}_Medical_Certificate.pdf`);
+    toast.success('Medical Certificate downloaded successfully');
+    
+    try {
+      const pdfBlob = doc.output('blob');
+      const formData = new FormData();
+      formData.append('file', pdfBlob, `${patientName.replace(' ', '_')}_Certificate.pdf`);
+      formData.append('recordType', 'Medical Certificate');
+      formData.append('description', `Medical Certificate recommending ${certDays} days of rest.`);
+      formData.append('date', new Date().toISOString());
+
+      await api.post(`/patients/${selectedAppt.patientId}/records`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Certificate saved to patient records.');
+    } catch (error) {
+      toast.error('Failed to save certificate to patient records.');
+    }
+  };
 
   const { data: appointments, isLoading, isError } = useQuery({
     queryKey: ['doctorAppointments', 'today'],
@@ -50,12 +143,26 @@ const DoctorDashboard = () => {
   });
 
   const completeAppointmentMutation = useMutation({
-    mutationFn: (id) => api.patch(`/appointments/${id}/status`, { status: 'COMPLETED' }),
+    mutationFn: async (id) => {
+      // 1. Mark appointment as completed
+      await api.patch(`/appointments/${id}/status`, { status: 'COMPLETED' });
+      
+      // 2. Generate the Consultation Bill automatically
+      await api.post('/billing', {
+        patientId: selectedAppt.patientId,
+        items: [{
+          description: `Consultation Fee (Dr. ${selectedAppt.doctor.user.lastName})`,
+          amount: 500.00,
+          quantity: 1,
+          type: 'CONSULTATION'
+        }]
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['doctorAppointments']);
       setSelectedAppt(null);
       setIsCompleteModalOpen(false);
-      toast.success('Consultation marked as Completed!');
+      toast.success('Consultation Completed & Bill Generated!');
     }
   });
 
@@ -202,7 +309,7 @@ const DoctorDashboard = () => {
 
       {/* Consultation Modal */}
       {selectedAppt && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-gray-900/50 z-50 flex items-center justify-center p-4">
           <div className="bg-surface rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
             
             {/* Modal Header */}
@@ -234,7 +341,7 @@ const DoctorDashboard = () => {
                   onClick={() => {
                     setSelectedAppt(null);
                     setActiveTab('diagnosis');
-                    setMedicines([{ name: '', dosage: '', duration: '' }]);
+                    setMedicines([{ medicineId: '', dosage: '', frequency: '', duration: '' }]);
                   }} 
                   className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
                 >
@@ -251,6 +358,8 @@ const DoctorDashboard = () => {
                 { id: 'lab', label: 'Lab Tests', icon: <TestTube size={16} /> },
                 { id: 'history', label: 'Medical History', icon: <History size={16} /> },
                 { id: 'followup', label: 'Follow-up', icon: <CalendarPlus size={16} /> },
+                { id: 'certificate', label: 'Certificate', icon: <FileBadge size={16} /> },
+                { id: 'voice', label: 'Voice Notes', icon: <Mic size={16} /> },
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -318,16 +427,17 @@ const DoctorDashboard = () => {
                   </div>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
                     <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700 mb-2 px-2">
-                      <div className="col-span-4">Medicine Name</div>
-                      <div className="col-span-3">Dosage</div>
-                      <div className="col-span-3">Duration</div>
+                      <div className="col-span-3">Medicine Name</div>
+                      <div className="col-span-2">Dosage</div>
+                      <div className="col-span-3">Frequency</div>
+                      <div className="col-span-2">Duration</div>
                       <div className="col-span-2 text-right">Action</div>
                     </div>
                     
                     <div className="space-y-2">
                       {medicines.map((med, index) => (
                         <div key={index} className="grid grid-cols-12 gap-4 items-center bg-surface p-2 rounded-md border border-gray-100 dark:border-gray-800 text-sm">
-                          <div className="col-span-4">
+                          <div className="col-span-3">
                             <select 
                               className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-primary focus:border-primary outline-none" 
                               value={med.medicineId}
@@ -343,11 +453,11 @@ const DoctorDashboard = () => {
                               ))}
                             </select>
                           </div>
-                          <div className="col-span-3">
+                          <div className="col-span-2">
                             <input 
                               type="text" 
                               className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-primary focus:border-primary outline-none" 
-                              placeholder="1-0-1 (After Food)" 
+                              placeholder="500mg" 
                               value={med.dosage}
                               onChange={(e) => {
                                 const newMeds = [...medicines];
@@ -357,6 +467,19 @@ const DoctorDashboard = () => {
                             />
                           </div>
                           <div className="col-span-3">
+                            <input 
+                              type="text" 
+                              className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-primary focus:border-primary outline-none" 
+                              placeholder="1-0-1 (After Food)" 
+                              value={med.frequency}
+                              onChange={(e) => {
+                                const newMeds = [...medicines];
+                                newMeds[index].frequency = e.target.value;
+                                setMedicines(newMeds);
+                              }}
+                            />
+                          </div>
+                          <div className="col-span-2">
                             <input 
                               type="text" 
                               className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-primary focus:border-primary outline-none" 
@@ -373,7 +496,7 @@ const DoctorDashboard = () => {
                             <button 
                               onClick={() => {
                                 const newMeds = medicines.filter((_, i) => i !== index);
-                                setMedicines(newMeds.length ? newMeds : [{ name: '', dosage: '', duration: '' }]);
+                                setMedicines(newMeds.length ? newMeds : [{ medicineId: '', dosage: '', frequency: '', duration: '' }]);
                               }}
                               className="text-error hover:underline text-xs font-medium"
                             >
@@ -396,7 +519,7 @@ const DoctorDashboard = () => {
                           items: validMeds.map(m => ({
                             medicineId: m.medicineId,
                             dosage: m.dosage,
-                            frequency: m.dosage,
+                            frequency: m.frequency,
                             duration: m.duration
                           }))
                         });
@@ -517,6 +640,65 @@ const DoctorDashboard = () => {
                 </div>
               )}
 
+              {activeTab === 'certificate' && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Generate Medical Certificate</h3>
+                  <div className="max-w-md space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Recommended Rest (Days)</label>
+                      <input 
+                        type="number" 
+                        min="1"
+                        max="90"
+                        className="w-full p-2.5 border border-gray-200 rounded-lg text-sm" 
+                        value={certDays}
+                        onChange={(e) => setCertDays(Number(e.target.value))}
+                      />
+                    </div>
+                    <Button onClick={generateCertificate}>
+                      Download Certificate PDF
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'voice' && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col items-center py-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Record Clinical Voice Note</h3>
+                  <p className="text-sm text-gray-500 mb-8 text-center max-w-sm">
+                    Record your observations. They will be securely uploaded and attached to the patient's medical history.
+                  </p>
+                  
+                  <div className="flex flex-col items-center gap-6">
+                    <div className={`w-32 h-32 rounded-full flex items-center justify-center shadow-lg transition-all ${
+                      isRecording ? 'bg-red-50 border-4 border-red-500 shadow-red-200/50' : 'bg-primary/10 border-4 border-primary/20'
+                    }`}>
+                      {isRecording ? (
+                        <div className="flex gap-2">
+                           <span className="w-2 h-8 bg-red-500 rounded-full animate-pulse"></span>
+                           <span className="w-2 h-12 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '150ms' }}></span>
+                           <span className="w-2 h-6 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></span>
+                        </div>
+                      ) : (
+                        <Mic size={48} className="text-primary" />
+                      )}
+                    </div>
+                    
+                    {uploadingVoice ? (
+                      <Button disabled className="w-48">Uploading...</Button>
+                    ) : isRecording ? (
+                      <Button variant="destructive" className="w-48 bg-error hover:bg-error/90" onClick={stopRecording}>
+                        <Square size={16} className="mr-2" /> Stop Recording
+                      </Button>
+                    ) : (
+                      <Button className="w-48" onClick={startRecording}>
+                        <Mic size={16} className="mr-2" /> Start Recording
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </div>
@@ -524,7 +706,7 @@ const DoctorDashboard = () => {
 
       {/* Complete Consultation Modal */}
       {isCompleteModalOpen && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-gray-900/50 z-[60] flex items-center justify-center p-4">
           <Card className="w-full max-w-sm shadow-2xl">
             <CardHeader className="border-b border-gray-100 pb-4">
               <CardTitle>Complete Consultation</CardTitle>
