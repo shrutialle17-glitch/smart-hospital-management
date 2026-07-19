@@ -52,6 +52,7 @@ const PatientDashboard = () => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [newAppointment, setNewAppointment] = useState({ doctorId: '', date: '', time: '', reason: '' });
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   
   const { data, isLoading } = useQuery({
     queryKey: ['patientDashboard', user?.id],
@@ -124,7 +125,6 @@ const PatientDashboard = () => {
         currency: order.currency,
         name: 'MediCore Hospital',
         description: `Payment for Bill #${variables.id.substring(0, 6).toUpperCase()}`,
-        image: '/logo.png',
         order_id: order.id,
         handler: function (response) {
           verifyPaymentMutation.mutate({
@@ -294,11 +294,19 @@ const PatientDashboard = () => {
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="w-full bg-white dark:bg-surface border-gray-200 dark:border-gray-800 text-xs"
+                    className="flex-1 bg-white dark:bg-surface border-gray-200 dark:border-gray-800 text-xs text-error hover:text-error hover:bg-error/10"
                     disabled={cancelMutation.isPending}
+                    onClick={() => setIsCancelModalOpen(true)}
+                  >
+                    {cancelMutation.isPending ? 'Canceling...' : 'Cancel'}
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1 bg-white dark:bg-surface border-gray-200 dark:border-gray-800 text-xs"
                     onClick={() => setIsRescheduleModalOpen(true)}
                   >
-                    {cancelMutation.isPending ? 'Canceling...' : 'Reschedule'}
+                    Reschedule
                   </Button>
                 </div>
               </div>
@@ -667,6 +675,36 @@ const PatientDashboard = () => {
                   }}
                 >
                   {cancelMutation.isPending ? 'Processing...' : 'Confirm'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {isCancelModalOpen && (
+        <div className="fixed inset-0 bg-gray-900/50 z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-sm shadow-2xl">
+            <CardHeader className="border-b border-gray-100 pb-4">
+              <CardTitle className="text-error">Cancel Appointment</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <p className="text-sm text-gray-600 mb-6">Are you sure you want to cancel this appointment? This action cannot be undone.</p>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setIsCancelModalOpen(false)}>No, Keep it</Button>
+                <Button 
+                  className="bg-error hover:bg-error/90 text-white"
+                  disabled={cancelMutation.isPending}
+                  onClick={() => {
+                    cancelMutation.mutate(data.appointments[0].id, {
+                      onSuccess: () => {
+                        setIsCancelModalOpen(false);
+                      }
+                    });
+                  }}
+                >
+                  {cancelMutation.isPending ? 'Canceling...' : 'Yes, Cancel'}
                 </Button>
               </div>
             </CardContent>
