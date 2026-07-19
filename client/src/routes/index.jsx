@@ -41,7 +41,6 @@ const AmbulancePage = lazy(() => import('../pages/admin/AmbulancePage'));
 const BloodBankPage = lazy(() => import('../pages/admin/BloodBankPage'));
 const EmergencySOS = lazy(() => import('../pages/admin/EmergencySOS'));
 const OrganDonationPage = lazy(() => import('../pages/admin/OrganDonationPage'));
-const MedicineIntelligence = lazy(() => import('../pages/pharmacist/MedicineIntelligence'));
 
 // Generic List Views for Sidebar
 const GenericListPage = lazy(() => import('../pages/GenericListPage'));
