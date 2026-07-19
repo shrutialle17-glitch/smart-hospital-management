@@ -1,3 +1,23 @@
+const PatientEnhancementDashboard = lazy(
+  () => import("../pages/patient/PatientEnhancementDashboard")
+);
+
+const PatientQR = lazy(
+  () => import("../pages/patient/PatientQR")
+);
+
+const PatientTimeline = lazy(
+  () => import("../pages/patient/PatientTimeline")
+);
+
+const VoiceNotes = lazy(
+  () => import("../pages/patient/VoiceNotes")
+);
+
+const MedicalCertificate = lazy(
+  () => import("../pages/patient/MedicalCertificate")
+);
+
 import {
   BrowserRouter,
   Routes,
@@ -152,6 +172,30 @@ const AppRoutes = () => {
                   ]}
                 />
               } />
+              <Route
+  path="patient/enhancement"
+  element={<PatientEnhancementDashboard />}
+/>
+
+<Route
+  path="patient/qr"
+  element={<PatientQR />}
+/>
+
+<Route
+  path="patient/timeline"
+  element={<PatientTimeline />}
+/>
+
+<Route
+  path="patient/voice-notes"
+  element={<VoiceNotes />}
+/>
+
+<Route
+  path="patient/medical-certificate"
+  element={<MedicalCertificate />}
+/>
             </Route>
             
             {/* Receptionist Routes */}
