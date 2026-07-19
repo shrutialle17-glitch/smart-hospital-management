@@ -190,7 +190,7 @@ const BedManagement = () => {
 
   if (loadingWards || loadingBeds) {
     return (
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-6 max-w-[1600px] mx-auto space-y-6">
         <SkeletonLoader type="title" />
         <SkeletonLoader type="card" count={3} className="grid grid-cols-1 md:grid-cols-3 gap-4" />
       </div>
@@ -202,7 +202,7 @@ const BedManagement = () => {
   const patients = patientsData?.data || [];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-7xl mx-auto">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-[1600px] mx-auto">
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ward & Bed Management</h1>

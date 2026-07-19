@@ -103,7 +103,7 @@ const AmbulancePage = () => {
 
   if (loadingAmbs || loadingReqs) {
     return (
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-6 max-w-[1600px] mx-auto space-y-6">
         <SkeletonLoader type="title" />
         <SkeletonLoader type="card" count={2} />
       </div>
@@ -119,7 +119,7 @@ const AmbulancePage = () => {
   const steps = ['REQUESTED', 'DISPATCHED', 'EN_ROUTE', 'ARRIVED'];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-7xl mx-auto space-y-8">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-[1600px] mx-auto space-y-8">
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ambulance Dispatch</h1>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Stethoscope, Shield, HeartPulse, Activity, Phone, 
   ChevronDown, ChevronUp, ArrowRight, CheckCircle,
@@ -10,6 +11,7 @@ import {
 import { Button } from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
 import Navbar from '../components/Navbar';
+import api from '../services/api';
 
 // --- Fictional Data ---
 const stats = [
@@ -17,13 +19,6 @@ const stats = [
   { label: "Specialists", value: "500+", icon: <Stethoscope className="text-primary w-8 h-8" /> },
   { label: "Awards Won", value: "150+", icon: <Award className="text-primary w-8 h-8" /> },
   { label: "Years of Trust", value: "25+", icon: <Building className="text-primary w-8 h-8" /> }
-];
-
-const doctors = [
-  { name: "Dr. Sarah Jenkins", role: "Chief of Surgery", exp: "15 Years Exp." },
-  { name: "Dr. Marcus Thorne", role: "Head of Cardiology", exp: "22 Years Exp." },
-  { name: "Dr. Emily Chen", role: "Lead Pediatrician", exp: "10 Years Exp." },
-  { name: "Dr. James Wilson", role: "Neurology Specialist", exp: "18 Years Exp." }
 ];
 
 const testimonials = [
@@ -58,6 +53,14 @@ const staggerContainer = {
 const Home = () => {
   const shouldReduceMotion = useReducedMotion();
 
+  const { data: apiDoctors } = useQuery({
+    queryKey: ['publicDoctors'],
+    queryFn: async () => {
+      const { data } = await api.get('/public/doctors');
+      return data.data;
+    }
+  });
+
   // Floating animation for background elements (disabled if reduced motion requested)
   const floatAnimation = shouldReduceMotion ? {} : {
     animate: { y: [0, -20, 0], opacity: [0.2, 0.4, 0.2] },
@@ -83,7 +86,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/40 to-transparent dark:from-black/95 dark:via-black/60 dark:to-black/20"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <motion.div 
             initial="hidden"
             animate="visible"
@@ -121,7 +124,7 @@ const Home = () => {
 
       {/* --- STATISTICS SECTION --- */}
       <section className="py-12 bg-surface border-y border-gray-100 dark:border-gray-800 relative z-10 -mt-8 shadow-sm w-full px-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1600px] mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, idx) => (
               <motion.div 
@@ -145,7 +148,7 @@ const Home = () => {
 
       {/* --- ACHIEVEMENTS / SERVICES --- */}
       <section className="py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-[1600px] mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl font-heading font-bold text-secondary mb-4">Pioneering Medical Excellence</h2>
             <p className="text-gray-500 text-lg">We combine cutting-edge technology with world-renowned specialists to deliver unparalleled patient outcomes.</p>
@@ -187,7 +190,7 @@ const Home = () => {
 
       {/* --- DOCTOR SHOWCASE --- */}
       <section className="py-24 bg-surface">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-[1600px] mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div>
               <h2 className="text-4xl font-heading font-bold text-secondary mb-4">Meet Our Experts</h2>
@@ -199,22 +202,26 @@ const Home = () => {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {doctors.map((doc, idx) => (
+            {(apiDoctors || []).slice(0, 4).map((doc, idx) => (
               <motion.div 
                 key={idx}
                 whileHover={{ y: -10 }}
-                className="bg-background rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm"
+                className="bg-background rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm group"
               >
-                <div className="h-64 bg-gray-200 dark:bg-gray-800 flex items-center justify-center relative">
-                  <User className="w-20 h-20 text-gray-400" />
+                <div className="h-64 bg-gray-200 dark:bg-gray-800 flex items-center justify-center relative overflow-hidden">
+                  {doc.profileImage ? (
+                    <img src={doc.profileImage} alt={doc.firstName} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  ) : (
+                    <User className="w-20 h-20 text-gray-400 group-hover:scale-105 transition-transform duration-500" />
+                  )}
                   <div className="absolute bottom-3 right-3 bg-white dark:bg-gray-900 rounded-full p-2 shadow-md">
                     <Star className="w-4 h-4 text-warning fill-warning" />
                   </div>
                 </div>
                 <div className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{doc.name}</h3>
-                  <p className="text-primary font-medium text-sm mb-2">{doc.role}</p>
-                  <p className="text-gray-500 text-xs">{doc.exp}</p>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Dr. {doc.firstName} {doc.lastName}</h3>
+                  <p className="text-primary font-medium text-sm mb-2">{doc.doctorProfile?.department?.name || 'General Medicine'}</p>
+                  <p className="text-gray-500 text-xs">{doc.doctorProfile?.experience || 5}+ Years Experience</p>
                 </div>
               </motion.div>
             ))}
@@ -224,7 +231,7 @@ const Home = () => {
 
       {/* --- TESTIMONIALS --- */}
       <section className="py-24 bg-primary/5">
-        <div className="max-w-7xl mx-auto px-6 text-center">
+        <div className="max-w-[1600px] mx-auto px-6 text-center">
           <h2 className="text-4xl font-heading font-bold text-secondary mb-16">Patient Stories</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, idx) => (
@@ -255,7 +262,7 @@ const Home = () => {
       {/* --- EMERGENCY BANNER --- */}
       <section className="py-16 bg-error text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
-        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="max-w-[1600px] mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold font-heading mb-2">Need Immediate Care?</h2>
             <p className="text-error-50 opacity-90 text-lg">Our Level 1 Trauma Center is on standby 24/7/365.</p>
@@ -288,7 +295,7 @@ const Home = () => {
 
       {/* --- PARTNERS --- */}
       <section className="py-12 border-t border-gray-100 dark:border-gray-800 bg-background overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-[1600px] mx-auto px-6">
           <p className="text-center text-sm font-semibold text-gray-400 uppercase tracking-widest mb-8">Trusted by Global Healthcare Partners</p>
           <div className="flex flex-wrap justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
             {partners.map((p, i) => (
@@ -300,7 +307,7 @@ const Home = () => {
 
       {/* --- MODERN FOOTER --- */}
       <footer className="bg-gray-900 text-gray-300 py-16 border-t-4 border-primary">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="max-w-[1600px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-6">
               <img src="/logo.png" alt="MediCore Logo" className="w-8 h-8 object-contain" />
@@ -344,7 +351,7 @@ const Home = () => {
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-gray-800 text-sm text-center text-gray-500">
+        <div className="max-w-[1600px] mx-auto px-6 mt-16 pt-8 border-t border-gray-800 text-sm text-center text-gray-500">
           &copy; {new Date().getFullYear()} MediCore Medical Center. All rights reserved. (Fictional Platform)
         </div>
       </footer>

@@ -356,7 +356,7 @@ const MainLayout = () => {
         {/* Dynamic Page Content and Footer Container */}
         <div className="flex-1 flex flex-col overflow-y-auto bg-gray-50/50 dark:bg-background">
           <div className="p-4 md:p-8 flex-1">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-[1600px] mx-auto">
               <motion.div
                 key={location.pathname}
                 initial={{ opacity: 0, y: 8 }}

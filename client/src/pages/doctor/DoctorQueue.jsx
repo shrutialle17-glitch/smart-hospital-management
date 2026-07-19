@@ -60,7 +60,7 @@ const DoctorQueue = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-6 max-w-[1600px] mx-auto space-y-6">
         <SkeletonLoader type="title" />
         <SkeletonLoader type="card" count={2} />
       </div>
@@ -71,7 +71,7 @@ const DoctorQueue = () => {
   const waitingTokens = tokens.filter(t => t.status === 'WAITING');
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-7xl mx-auto space-y-8">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-[1600px] mx-auto space-y-8">
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Live Queue</h1>

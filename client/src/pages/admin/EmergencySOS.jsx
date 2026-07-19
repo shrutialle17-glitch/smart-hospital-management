@@ -60,7 +60,7 @@ const EmergencySOS = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-6 max-w-[1600px] mx-auto space-y-6">
         <SkeletonLoader type="title" />
         <SkeletonLoader type="card" count={4} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" />
         <SkeletonLoader type="card" count={1} />
@@ -72,7 +72,7 @@ const EmergencySOS = () => {
   const queue = (activeQueueData?.data || []).filter(r => r.status !== 'COMPLETED' && r.status !== 'CANCELLED');
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-7xl mx-auto space-y-8">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-[1600px] mx-auto space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">

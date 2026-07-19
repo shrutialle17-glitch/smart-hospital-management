@@ -25,7 +25,7 @@ const DoctorsPage = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="max-w-7xl mx-auto px-6"
+          className="max-w-[1600px] mx-auto px-6"
         >
           <div className="mb-12">
             <h1 className="text-4xl md:text-5xl font-heading font-bold text-secondary mb-4">Our Medical Experts</h1>

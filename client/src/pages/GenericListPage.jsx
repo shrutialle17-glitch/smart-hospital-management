@@ -18,7 +18,7 @@ const GenericListPage = ({ title, endpoint, columns }) => {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-[1600px] mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-heading font-bold text-secondary mb-2">{title}</h1>

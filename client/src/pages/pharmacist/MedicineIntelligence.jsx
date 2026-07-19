@@ -17,7 +17,7 @@ const MedicineIntelligence = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-6 max-w-[1600px] mx-auto space-y-6">
         <SkeletonLoader type="title" />
         <SkeletonLoader type="card" count={2} className="grid grid-cols-1 md:grid-cols-2 gap-6" />
       </div>
@@ -27,7 +27,7 @@ const MedicineIntelligence = () => {
   const { prescribingTrends = [], restockRecommendations = [] } = intelData?.data || {};
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-7xl mx-auto space-y-8">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 max-w-[1600px] mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent dark:from-secondary dark:to-accent flex items-center gap-2">
           <SparklesIcon className="w-7 h-7 text-primary dark:text-secondary" />
