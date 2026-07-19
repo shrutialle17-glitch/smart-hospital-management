@@ -1,4 +1,5 @@
 import { prisma } from '../index.js';
+import { notificationService } from '../services/notificationService.js';
 
 export const getLabTests = async (req, res, next) => {
   try {
@@ -123,13 +124,11 @@ export const updateLabReport = async (req, res, next) => {
     // If completed, notify patient
     if (status === 'COMPLETED') {
       const populatedReport = await prisma.labReport.findUnique({ where: { id }, include: { patient: true } });
-      await prisma.notification.create({
-        data: {
-          userId: populatedReport.patient.userId,
-          title: 'Lab Report Ready',
-          message: 'Your recent lab report is now available for download.',
-          type: 'LAB'
-        }
+      await notificationService.send(populatedReport.patient.userId, 'LAB', {
+        title: 'Lab Report Ready',
+        message: 'Your recent lab report is now available for download.',
+        relatedEntityType: 'LAB_REPORT',
+        relatedEntityId: populatedReport.id
       });
     }
 

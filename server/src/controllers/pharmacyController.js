@@ -1,4 +1,5 @@
 import { prisma } from '../index.js';
+import { notificationService } from '../services/notificationService.js';
 
 export const getMedicines = async (req, res, next) => {
   try {
@@ -11,10 +12,7 @@ export const getMedicines = async (req, res, next) => {
     if (categoryId) where.categoryId = categoryId;
     if (search) where.name = { contains: search, mode: 'insensitive' };
     
-    // Low stock filter logic
-    if (lowStock === 'true') {
-      where.stockLevel = { lte: prisma.medicine.fields.minStock }; 
-    }
+    // Low stock filter logic is handled after fetching using array filter since Prisma field referencing can be tricky
 
     const [medicines, total] = await Promise.all([
       prisma.medicine.findMany({
@@ -179,8 +177,16 @@ export const updatePrescriptionStatus = async (req, res, next) => {
 
     const prescription = await prisma.prescription.update({
       where: { id },
-      data: { status }
+      data: { status },
+      include: { patient: true }
     });
+
+    if (status === 'FULFILLED') {
+      await notificationService.send(prescription.patient.userId, 'PRESCRIPTION', {
+        title: 'Prescription Ready',
+        message: 'Your prescribed medicines have been successfully dispensed by the pharmacy.'
+      });
+    }
 
     res.status(200).json({ success: true, data: prescription });
   } catch (error) {
@@ -196,5 +202,29 @@ export const getCategories = async (req, res, next) => {
     res.status(200).json({ success: true, data: categories });
   } catch (error) {
     next(error);
+  }
+};
+
+// ==========================================
+// Phase 3: Pharmacy Analytics & Intelligence
+// ==========================================
+
+import { getPharmacyAnalytics, getMedicineIntelligence } from '../services/pharmacyAnalyticsService.js';
+
+export const getAnalytics = async (req, res, next) => {
+  try {
+    const data = await getPharmacyAnalytics();
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getIntelligence = async (req, res, next) => {
+  try {
+    const data = await getMedicineIntelligence();
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
   }
 };

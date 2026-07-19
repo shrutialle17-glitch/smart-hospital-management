@@ -24,7 +24,9 @@ import notificationRoutes from './routes/notification.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import departmentRoutes from './routes/department.routes.js';
 import doctorWorkspaceRoutes from './routes/doctorWorkspace.routes.js';
-import liveQueueRoutes from './routes/liveQueue.routes.js';
+import queueRoutes from './routes/queue.routes.js';
+import voiceNoteRoutes from './routes/voiceNote.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 
 // We will import more routes here as we build them
 
@@ -74,8 +76,9 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/departments', departmentRoutes);
 app.use('/api/v1/doctor-workspace', doctorWorkspaceRoutes);
-app.use('/api/v1/live-queue', liveQueueRoutes);
-
+app.use('/api/v1/queue', queueRoutes);
+app.use('/api/v1/voice-notes', voiceNoteRoutes);
+app.use('/api/v1/ai', aiRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

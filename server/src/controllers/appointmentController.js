@@ -1,4 +1,5 @@
 import { prisma } from '../index.js';
+import { notificationService } from '../services/notificationService.js';
 
 export const getAllAppointments = async (req, res, next) => {
   try {
@@ -114,23 +115,21 @@ export const createAppointment = async (req, res, next) => {
       include: { doctor: true, patient: true }
     });
 
-    // Generate Notifications
-    await prisma.notification.createMany({
-      data: [
-        {
-          userId: appointment.doctor.userId,
-          title: 'New Appointment Booked',
-          message: `You have a new appointment scheduled for ${new Date(date).toLocaleDateString()}.`,
-          type: 'APPOINTMENT'
-        },
-        {
-          userId: appointment.patient.userId,
-          title: 'Appointment Booked',
-          message: `Your appointment has been successfully booked for ${new Date(date).toLocaleDateString()}.`,
-          type: 'APPOINTMENT'
-        }
-      ]
-    });
+    // Generate Notifications via Smart Notification Center
+    await Promise.all([
+      notificationService.send(appointment.doctor.userId, 'APPOINTMENT', {
+        title: 'New Appointment Booked',
+        message: `You have a new appointment scheduled for ${new Date(date).toLocaleDateString()}.`,
+        relatedEntityType: 'APPOINTMENT',
+        relatedEntityId: appointment.id
+      }),
+      notificationService.send(appointment.patient.userId, 'APPOINTMENT', {
+        title: 'Appointment Booked',
+        message: `Your appointment has been successfully booked for ${new Date(date).toLocaleDateString()}.`,
+        relatedEntityType: 'APPOINTMENT',
+        relatedEntityId: appointment.id
+      })
+    ]);
 
     res.status(201).json({
       success: true,
@@ -189,14 +188,12 @@ export const updateAppointmentStatus = async (req, res, next) => {
       include: { patient: true }
     });
 
-    // Notify patient of status change
-    await prisma.notification.create({
-      data: {
-        userId: appointment.patient.userId,
-        title: 'Appointment Update',
-        message: `Your appointment status has been updated to ${status}.`,
-        type: 'APPOINTMENT'
-      }
+    // Notify patient of status change via Smart Notification Center
+    await notificationService.send(appointment.patient.userId, 'APPOINTMENT', {
+      title: 'Appointment Update',
+      message: `Your appointment status has been updated to ${status}.`,
+      relatedEntityType: 'APPOINTMENT',
+      relatedEntityId: appointment.id
     });
 
     res.status(200).json({

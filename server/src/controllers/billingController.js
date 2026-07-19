@@ -41,6 +41,7 @@ export const getBills = async (req, res, next) => {
 export const createBill = async (req, res, next) => {
   try {
     const { patientId, items, dueDate } = req.body;
+
     if (!patientId || !items || items.length === 0) {
        return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'patientId and items are required' } });
     }

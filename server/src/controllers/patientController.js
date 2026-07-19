@@ -159,11 +159,97 @@ export const addMedicalRecord = async (req, res, next) => {
         patientId: id,
         recordType,
         description,
-        date: date ? new Date(date) : new Date()
+        date: date ? new Date(date) : new Date(),
+        fileUrl: req.file?.path || null
       }
     });
 
     res.status(201).json({ success: true, data: record });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPatientTimeline = async (req, res, next) => {
+  try {
+    let { id } = req.params; // Patient ID
+
+    // If 'me' is used, fetch the logged-in user's patient profile
+    if (id === 'me') {
+       if (req.user.role !== 'PATIENT') {
+          return res.status(403).json({ success: false, error: { message: "Only patients can use 'me' alias." } });
+       }
+       const patient = await prisma.patient.findUnique({ where: { userId: req.user.id } });
+       if (!patient) return res.status(404).json({ success: false, error: { message: "Patient profile not found." } });
+       id = patient.id;
+    } else {
+      // RBAC Security Check: If user is PATIENT, they can only view their own timeline
+      if (req.user.role === 'PATIENT') {
+        const patient = await prisma.patient.findUnique({ where: { userId: req.user.id } });
+        if (!patient || patient.id !== id) {
+          return res.status(403).json({ success: false, error: { message: "Access denied. You can only view your own timeline." } });
+        }
+      }
+    }
+
+    // Fetch appointments first to get their IDs
+    const appointments = await prisma.appointment.findMany({ where: { patientId: id }, include: { doctor: { include: { user: true } } } });
+    const appointmentIds = appointments.map(a => a.id);
+
+    // Fetch remaining data concurrently
+    const [medicalRecords, prescriptions, labReports, bills, voiceNotes] = await Promise.all([
+      prisma.medicalRecord.findMany({ where: { patientId: id } }),
+      prisma.prescription.findMany({ where: { patientId: id }, include: { doctor: { include: { user: true } } } }),
+      prisma.labReport.findMany({ where: { patientId: id }, include: { test: true } }),
+      prisma.bill.findMany({ where: { patientId: id } }),
+      prisma.voiceNote.findMany({ where: { consultationId: { in: appointmentIds } }, include: { doctor: { include: { user: true } } } })
+    ]);
+
+    // Map into a uniform timeline event structure
+    const timeline = [];
+
+    appointments.forEach(app => timeline.push({
+      id: app.id, type: 'APPOINTMENT', date: app.date,
+      title: `Appointment with Dr. ${app.doctor.user.lastName}`,
+      description: `Status: ${app.status} | Reason: ${app.reason || 'N/A'}`
+    }));
+
+    medicalRecords.forEach(rec => timeline.push({
+      id: rec.id, type: 'MEDICAL_RECORD', date: rec.date,
+      title: `Medical Record: ${rec.recordType}`,
+      description: rec.description,
+      fileUrl: rec.fileUrl || null
+    }));
+
+    prescriptions.forEach(rx => timeline.push({
+      id: rx.id, type: 'PRESCRIPTION', date: rx.date,
+      title: `Prescription from Dr. ${rx.doctor.user.lastName}`,
+      description: `Status: ${rx.status} | Notes: ${rx.notes || 'N/A'}`
+    }));
+
+    labReports.forEach(lab => timeline.push({
+      id: lab.id, type: 'LAB_REPORT', date: lab.date,
+      title: `Lab Test: ${lab.test.name}`,
+      description: `Status: ${lab.status} | Result: ${lab.result || 'Pending'}`
+    }));
+
+    bills.forEach(bill => timeline.push({
+      id: bill.id, type: 'BILL', date: bill.createdAt,
+      title: `Invoice Generated`,
+      description: `Total: $${bill.totalAmount} | Status: ${bill.status}`
+    }));
+
+    voiceNotes.forEach(note => timeline.push({
+      id: note.id, type: 'VOICE_NOTE', date: note.createdAt,
+      title: `Clinical Voice Note: Dr. ${note.doctor.user.lastName}`,
+      description: 'Audio consultation summary',
+      fileUrl: note.url
+    }));
+
+    // Sort by date descending (newest first)
+    timeline.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.status(200).json({ success: true, data: timeline });
   } catch (error) {
     next(error);
   }

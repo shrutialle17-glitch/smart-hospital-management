@@ -69,3 +69,45 @@ export const uploadProfileImage = {
     }
   ]
 };
+
+// Expose a .single() method for Voice Notes (audio)
+export const uploadVoiceNote = {
+  single: (fieldName) => [
+    localUpload.single(fieldName),
+    async (req, res, next) => {
+      if (!req.file) return next();
+      try {
+        const result = await uploadStreamToCloudinary(req.file.buffer, {
+          folder: 'novacare_voice_notes',
+          resource_type: 'video', // Cloudinary treats audio as video resource_type
+        });
+        req.file.path = result.secure_url;
+        req.file.duration = result.duration; // Might be useful for metadata
+        next();
+      } catch (err) {
+        next(err);
+      }
+    }
+  ]
+};
+
+// Object exposing a .single() method for general Medical Records / Certificates
+export const uploadMedicalRecord = {
+  single: (fieldName) => [
+    localUpload.single(fieldName),
+    async (req, res, next) => {
+      if (!req.file) return next();
+      try {
+        const isPdf = req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf');
+        const result = await uploadStreamToCloudinary(req.file.buffer, {
+          folder: 'novacare_medical_records',
+          resource_type: isPdf ? 'raw' : 'auto'
+        });
+        req.file.path = result.secure_url;
+        next();
+      } catch (err) {
+        next(err);
+      }
+    }
+  ]
+};
