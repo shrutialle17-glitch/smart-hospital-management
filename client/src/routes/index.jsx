@@ -41,6 +41,7 @@ const GenericListPage = lazy(() => import('../pages/GenericListPage'));
 
 const DoctorQueue = lazy(() => import('../pages/doctor/DoctorQueue'));
 const QueueStatus = lazy(() => import('../pages/patient/QueueStatus'));
+const QueueManagement = lazy(() => import('../pages/admin/QueueManagement'));
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { isAuthenticated, user } = useAuthStore();
@@ -83,12 +84,14 @@ const AppRoutes = () => {
               <Route path="admin" element={<AdminDashboard />} />
             </Route>
 
-            {/* Shared operations routes for Admin and Receptionist */}
+            {/* Shared Operations (Admin/Receptionist/Doctor) */}
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'RECEPTIONIST']} />}>
               <Route path="operations/beds" element={<BedManagement />} />
               <Route path="operations/ambulance" element={<AmbulancePage />} />
+              <Route path="operations/queue" element={<QueueManagement />} />
               <Route path="operations/emergency" element={<EmergencySOS />} />
             </Route>
+
             <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'LAB_STAFF']} />}>
               <Route path="operations/blood-bank" element={<BloodBankPage />} />
               <Route path="operations/organ-donation" element={<OrganDonationPage />} />

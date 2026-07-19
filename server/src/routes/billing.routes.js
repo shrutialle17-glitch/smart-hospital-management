@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(isAuthenticated);
 
 router.get('/', hasRole(['ADMIN', 'RECEPTIONIST', 'PHARMACIST', 'PATIENT', 'DOCTOR']), getBills);
-router.post('/', hasRole(['ADMIN', 'RECEPTIONIST', 'PHARMACIST', 'DOCTOR']), createBill);
+router.post('/', hasRole(['ADMIN', 'RECEPTIONIST', 'PHARMACIST', 'DOCTOR', 'LAB_STAFF']), createBill);
 router.post('/:id/payments', hasRole(['ADMIN', 'RECEPTIONIST', 'PHARMACIST', 'PATIENT']), recordPayment);
 
 export default router;
