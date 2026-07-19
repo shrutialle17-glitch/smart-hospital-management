@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 enum Role {
@@ -56,9 +56,9 @@ model User {
   patientProfile      Patient?
   labStaffProfile     LabStaff?
   pharmacistProfile   Pharmacist?
-  
-  notifications Notification[]
-  auditLogs     AuditLog[]
+
+  notifications  Notification[]
+  auditLogs      AuditLog[]
   aiInteractions AIInteraction[]
 
   organDonorsRegistered     OrganDonor[]     @relation("RegisteredOrganDonors")
@@ -73,21 +73,21 @@ model Admin {
 }
 
 model Doctor {
-  id             String  @id @default(uuid())
-  userId         String  @unique
-  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  departmentId   String
-  department     Department @relation(fields: [departmentId], references: [id])
-  specialization String
-  qualifications String
-  experience     Int     // Years of experience
+  id              String     @id @default(uuid())
+  userId          String     @unique
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId    String
+  department      Department @relation(fields: [departmentId], references: [id])
+  specialization  String
+  qualifications  String
+  experience      Int // Years of experience
   consultationFee Float
 
-  appointments  Appointment[]
-  prescriptions Prescription[]
-  voiceNotes    VoiceNote[]
+  appointments          Appointment[]
+  prescriptions         Prescription[]
+  voiceNotes            VoiceNote[]
   prescriptionTemplates PrescriptionTemplate[]
-  queueTokens   QueueToken[]
+  queueTokens           QueueToken[]
 }
 
 model Receptionist {
@@ -97,9 +97,9 @@ model Receptionist {
 }
 
 model Patient {
-  id                String     @id @default(uuid())
-  userId            String     @unique
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String      @id @default(uuid())
+  userId            String      @unique
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   dob               DateTime
   gender            String
   bloodGroup        BloodGroup?
@@ -108,13 +108,13 @@ model Patient {
   allergies         String?
   chronicConditions String?
 
-  appointments   Appointment[]
-  medicalRecords MedicalRecord[]
-  prescriptions  Prescription[]
-  labReports     LabReport[]
-  bills          Bill[]
-  currentBed     Bed[]             @relation("CurrentBed")
-  bedAssignments BedAssignment[]   @relation("BedAssignments")
+  appointments      Appointment[]
+  medicalRecords    MedicalRecord[]
+  prescriptions     Prescription[]
+  labReports        LabReport[]
+  bills             Bill[]
+  currentBed        Bed[]              @relation("CurrentBed")
+  bedAssignments    BedAssignment[]    @relation("BedAssignments")
   ambulanceRequests AmbulanceRequest[] @relation("AmbulanceRequests")
   bloodRequests  BloodRequest[]    @relation("BloodRequests")
   queueTokens    QueueToken[]      @relation("QueueTokens")
@@ -145,20 +145,20 @@ model Department {
 }
 
 model Appointment {
-  id        String            @id @default(uuid())
-  patientId String
-  patient   Patient           @relation(fields: [patientId], references: [id])
-  doctorId  String
-  doctor    Doctor            @relation(fields: [doctorId], references: [id])
-  date      DateTime
-  startTime DateTime
-  endTime   DateTime
-  status    AppointmentStatus @default(PENDING)
-  reason    String?
-  notes     String?
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  queueToken QueueToken?      @relation("AppointmentToken")
+  id         String            @id @default(uuid())
+  patientId  String
+  patient    Patient           @relation(fields: [patientId], references: [id])
+  doctorId   String
+  doctor     Doctor            @relation(fields: [doctorId], references: [id])
+  date       DateTime
+  startTime  DateTime
+  endTime    DateTime
+  status     AppointmentStatus @default(PENDING)
+  reason     String?
+  notes      String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  queueToken QueueToken?       @relation("AppointmentToken")
 
   @@index([patientId])
   @@index([doctorId])
@@ -170,7 +170,7 @@ model MedicalRecord {
   id          String   @id @default(uuid())
   patientId   String
   patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  recordType  String   // e.g., "Consultation", "Surgery", "General"
+  recordType  String // e.g., "Consultation", "Surgery", "General"
   description String
   date        DateTime @default(now())
   fileUrl     String?
@@ -234,9 +234,9 @@ model Medicine {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
-  prescriptionItems    PrescriptionItem[]
+  prescriptionItems     PrescriptionItem[]
   inventoryTransactions InventoryTransaction[]
-  billItems            BillItem[]
+  billItems             BillItem[]
 
   @@index([categoryId])
 }
@@ -245,7 +245,7 @@ model InventoryTransaction {
   id              String   @id @default(uuid())
   medicineId      String
   medicine        Medicine @relation(fields: [medicineId], references: [id])
-  transactionType String   // "IN", "OUT", "ADJUSTMENT"
+  transactionType String // "IN", "OUT", "ADJUSTMENT"
   quantity        Int
   unitPrice       Float?
   notes           String?
@@ -283,32 +283,32 @@ model LabReport {
 }
 
 model Bill {
-  id            String     @id @default(uuid())
-  patientId     String
-  patient       Patient    @relation(fields: [patientId], references: [id])
-  totalAmount   Float
-  paidAmount    Float      @default(0)
-  status        String     @default("UNPAID") // UNPAID, PARTIAL, PAID
-  dueDate       DateTime?
-  items         BillItem[]
-  payments      Payment[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id          String     @id @default(uuid())
+  patientId   String
+  patient     Patient    @relation(fields: [patientId], references: [id])
+  totalAmount Float
+  paidAmount  Float      @default(0)
+  status      String     @default("UNPAID") // UNPAID, PARTIAL, PAID
+  dueDate     DateTime?
+  items       BillItem[]
+  payments    Payment[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@index([patientId])
   @@index([status])
 }
 
 model BillItem {
-  id         String   @id @default(uuid())
-  billId     String
-  bill       Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  id          String    @id @default(uuid())
+  billId      String
+  bill        Bill      @relation(fields: [billId], references: [id], onDelete: Cascade)
   description String
-  amount     Float
-  quantity   Int      @default(1)
-  type       String   // CONSULTATION, LAB, MEDICINE, OTHER
-  medicineId String?  // Optional relation if it's a medicine
-  medicine   Medicine? @relation(fields: [medicineId], references: [id])
+  amount      Float
+  quantity    Int       @default(1)
+  type        String // CONSULTATION, LAB, MEDICINE, OTHER
+  medicineId  String? // Optional relation if it's a medicine
+  medicine    Medicine? @relation(fields: [medicineId], references: [id])
 
   @@index([billId])
   @@index([medicineId])
@@ -319,7 +319,7 @@ model Payment {
   billId        String
   bill          Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
   amount        Float
-  paymentMethod String   // CASH, CARD, ONLINE
+  paymentMethod String // CASH, CARD, ONLINE
   transactionId String?
   date          DateTime @default(now())
   createdAt     DateTime @default(now())
@@ -333,12 +333,12 @@ model Notification {
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title             String
   message           String
-  type              String    // APPOINTMENT, LAB, PRESCRIPTION, BILLING, SYSTEM, VOICE_NOTE, CERTIFICATE
+  type              String // APPOINTMENT, LAB, PRESCRIPTION, BILLING, SYSTEM, VOICE_NOTE, CERTIFICATE
   isRead            Boolean   @default(false)
   readAt            DateTime?
   relatedEntityType String?
   relatedEntityId   String?
-  channelsSent      String[]  // Array of channels, e.g., ["IN_APP", "EMAIL"]
+  channelsSent      String[] // Array of channels, e.g., ["IN_APP", "EMAIL"]
   createdAt         DateTime  @default(now())
 
   @@index([userId])
@@ -399,12 +399,11 @@ model PrescriptionTemplate {
   doctorId  String
   doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
   name      String
-  items     Json     // Array of standardized prescription items
+  items     Json // Array of standardized prescription items
   createdAt DateTime @default(now())
 
   @@index([doctorId])
 }
-
 
 // ─────────────────────────────────────────────────────────────
 // Phase 3: Smart Operations Extension

@@ -39,17 +39,17 @@ const Navbar = () => {
   const isHome = location.pathname === '/';
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || !isHome ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || !isHome ? 'bg-white dark:bg-gray-900 shadow-sm py-3' : 'bg-transparent py-5'}`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="MediCore Logo" className="w-10 h-10 object-contain" />
-          <span className={`font-heading font-bold text-2xl tracking-tight ${isScrolled || !isHome ? 'text-secondary' : 'text-white'}`}>MediCore</span>
+          <span className={`font-heading font-bold text-2xl tracking-tight ${isScrolled || !isHome ? 'text-secondary dark:text-white' : 'text-white'}`}>MediCore</span>
         </Link>
 
         {/* Desktop Links */}
-        <div className={`hidden md:flex items-center gap-8 font-medium text-sm ${isScrolled || !isHome ? 'text-gray-700' : 'text-gray-200'}`}>
-          <Link to="/" onClick={() => window.scrollTo({top: 0})} className="hover:text-primary transition-colors">Home</Link>
+        <div className={`hidden md:flex items-center gap-8 font-medium text-sm ${isScrolled || !isHome ? 'text-gray-700 dark:text-gray-300' : 'text-white/90'}`}>
+          <Link to="/" onClick={() => window.scrollTo({ top: 0 })} className="hover:text-primary transition-colors">Home</Link>
           <Link to="/#services" className="hover:text-primary transition-colors">Services</Link>
           <Link to="/doctors" className="hover:text-primary transition-colors">Our Doctors</Link>
           <Link to="/#faq" className="hover:text-primary transition-colors">FAQ</Link>
@@ -57,14 +57,14 @@ const Navbar = () => {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
-          <button 
-            className={`p-2 transition-colors rounded-full hover:bg-primary/5 ${isScrolled || !isHome ? 'text-gray-500 hover:text-primary' : 'text-white hover:text-primary'}`}
+          <button
+            className={`p-2 transition-colors rounded-full hover:bg-primary/5 ${isScrolled || !isHome ? 'text-gray-500 dark:text-gray-400 hover:text-primary' : 'text-white hover:text-primary'}`}
             onClick={toggleTheme}
             title="Toggle Dark Mode"
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          
+
           {isAuthenticated ? (
             <Link to="/dashboard">
               <Button className="flex items-center gap-2 shadow-lg shadow-primary/20">
@@ -74,7 +74,7 @@ const Navbar = () => {
             </Link>
           ) : (
             <>
-              <Link to="/login" className={`text-sm font-medium transition-colors ${isScrolled || !isHome ? 'text-text-primary hover:text-primary' : 'text-white hover:text-primary'}`}>Log In</Link>
+              <Link to="/login" className={`text-sm font-medium transition-colors ${isScrolled || !isHome ? 'text-text-primary dark:text-gray-200 hover:text-primary' : 'text-white/90 hover:text-primary'}`}>Log In</Link>
               <Link to="/register">
                 <Button>Sign Up</Button>
               </Link>
@@ -84,13 +84,13 @@ const Navbar = () => {
 
         {/* Mobile Toggle */}
         <div className="flex items-center gap-3 md:hidden">
-          <button 
-            className={`p-2 transition-colors rounded-full ${isScrolled || !isHome ? 'text-gray-500 hover:text-primary' : 'text-white hover:text-primary'}`}
+          <button
+            className={`p-2 transition-colors rounded-full ${isScrolled || !isHome ? 'text-gray-500 dark:text-gray-400 hover:text-primary' : 'text-white hover:text-primary'}`}
             onClick={toggleTheme}
           >
             {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
           </button>
-          <button className={`transition-colors ${isScrolled || !isHome ? 'text-gray-800' : 'text-white'}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <button className={`transition-colors ${isScrolled || !isHome ? 'text-gray-800 dark:text-white' : 'text-white'}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -99,18 +99,20 @@ const Navbar = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden bg-surface border-t border-gray-100 dark:border-gray-800 overflow-hidden"
+            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 overflow-hidden"
           >
             <div className="px-6 py-4 flex flex-col gap-4">
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-gray-800 font-medium">Home</Link>
-              <Link to="/#services" onClick={() => setMobileMenuOpen(false)} className="text-gray-800 font-medium">Services</Link>
-              <Link to="/doctors" onClick={() => setMobileMenuOpen(false)} className="text-gray-800 font-medium">Our Doctors</Link>
-              <Link to="/#faq" onClick={() => setMobileMenuOpen(false)} className="text-gray-800 font-medium">FAQ</Link>
-              <hr className="border-gray-100" />
+              <div className="flex flex-col gap-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Link to="/" onClick={() => { window.scrollTo({ top: 0 }); setMobileMenuOpen(false); }} className="hover:text-primary transition-colors">Home</Link>
+                <Link to="/#services" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary transition-colors">Services</Link>
+                <Link to="/doctors" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary transition-colors">Our Doctors</Link>
+                <Link to="/#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-primary transition-colors">FAQ</Link>
+              </div>
+              <hr className="border-gray-100 dark:border-gray-800" />
               {isAuthenticated ? (
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full justify-center flex items-center gap-2">
@@ -120,10 +122,10 @@ const Navbar = () => {
               ) : (
                 <>
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                     <Button variant="outline" className="w-full justify-center">Log In</Button>
+                    <Button variant="outline" className="w-full justify-center">Log In</Button>
                   </Link>
                   <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                     <Button className="w-full justify-center">Sign Up</Button>
+                    <Button className="w-full justify-center">Sign Up</Button>
                   </Link>
                 </>
               )}

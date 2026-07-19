@@ -1,5 +1,6 @@
 import { prisma } from '../index.js';
 import { notificationService } from '../services/notificationService.js';
+import { getMedicineIntelligence } from '../services/pharmacyAnalyticsService.js';
 
 export const getMedicines = async (req, res, next) => {
   try {
